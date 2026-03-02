@@ -1,6 +1,8 @@
 import { requireClinic } from "@/lib/session";
 import { BottomNav } from "./bottom-nav";
 
+export const dynamic = "force-dynamic";
+
 export default async function AppLayout({
   children,
 }: {
