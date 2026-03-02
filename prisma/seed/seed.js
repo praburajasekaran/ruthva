@@ -1,4 +1,4 @@
-import { PrismaClient, JourneyStatus, RiskLevel, EventType } from '@prisma/client'
+const { PrismaClient, JourneyStatus, RiskLevel, EventType } = require('@prisma/client')
 
 const prisma = new PrismaClient()
 
@@ -34,14 +34,14 @@ async function main() {
     const todayStr = today.toISOString().split('T')[0]
 
     // Helper to add days
-    const addDays = (date: Date, days: number) => {
+    const addDays = (date, days) => {
         const result = new Date(date)
         result.setDate(result.getDate() + days)
         return result
     }
 
     // Helper to get Date only (zeroed time)
-    const getDateOnly = (date: Date) => {
+    const getDateOnly = (date) => {
         return new Date(date.toISOString().split('T')[0])
     }
 

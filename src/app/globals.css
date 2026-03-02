@@ -26,7 +26,10 @@
   --color-text-muted: #6b7280;
 
   /* Typography scale */
-  --font-sans: var(--font-manrope);
+  --font-sans: var(--font-sans);
+  /* Inter */
+  --font-heading: var(--font-heading);
+  /* Outfit */
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -50,6 +53,16 @@ body {
   font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-heading {
+  font-family: var(--font-heading);
 }
 
 /* Prevent iOS zoom on input focus — use 16px minimum */

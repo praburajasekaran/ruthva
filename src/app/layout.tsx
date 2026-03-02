@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Inter } from "next/font/google";
+import { Outfit, Inter } from "next/font/google";
 import "./globals.css";
 
-const jakarta = Plus_Jakarta_Sans({
+const outfit = Outfit({
   variable: "--font-heading",
   subsets: ["latin"],
   display: "swap",
@@ -38,7 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${manrope.variable} antialiased`} suppressHydrationWarning>
+      <body className={`${outfit.variable} ${inter.variable} antialiased`} suppressHydrationWarning>
         {children}
       </body>
     </html>
