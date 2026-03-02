@@ -22,11 +22,11 @@
   --color-border: #e5e7eb;
   --color-border-strong: #d1d5db;
   --color-text-primary: #111827;
-  --color-text-secondary: #6b7280;
-  --color-text-muted: #9ca3af;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #6b7280;
 
   /* Typography scale */
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-manrope);
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -46,6 +46,8 @@ body {
   background: var(--color-surface);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -70,4 +72,17 @@ textarea {
 /* Safe area padding for bottom nav */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (min-width: 1024px) {
+  .app-page {
+    margin-inline: auto;
+    max-width: 1200px;
+    padding: 2rem;
+  }
+
+  .app-card {
+    border-radius: 1rem;
+    padding: 1.25rem;
+  }
 }

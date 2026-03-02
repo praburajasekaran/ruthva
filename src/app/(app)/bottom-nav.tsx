@@ -15,7 +15,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-surface pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-surface pb-safe lg:hidden">
       <div className="mx-auto flex h-14 max-w-lg items-center justify-around">
         {tabs.map((tab) => {
           const isActive =
@@ -33,7 +33,7 @@ export function BottomNav() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-600 text-white shadow-sm">
                   <Icon className="h-5 w-5" />
                 </div>
-                <span className="text-[10px] font-medium text-brand-600">
+                <span className="text-xs font-semibold text-brand-600">
                   {tab.label}
                 </span>
               </Link>
@@ -52,7 +52,7 @@ export function BottomNav() {
                 }`}
               />
               <span
-                className={`text-[10px] font-medium ${
+                className={`text-xs font-semibold ${
                   isActive ? "text-brand-600" : "text-text-muted"
                 }`}
               >

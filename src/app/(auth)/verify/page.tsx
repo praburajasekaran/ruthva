@@ -2,8 +2,9 @@
 
 import { useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Leaf, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { AppLogo } from "@/components/branding/app-logo";
 
 function VerifyContent() {
   const searchParams = useSearchParams();
@@ -36,10 +37,10 @@ function VerifyContent() {
         </Link>
 
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-100">
-            <Leaf className="h-8 w-8 text-brand-600" />
+          <div className="mx-auto mb-6 flex items-center justify-center">
+            <AppLogo priority className="h-10 sm:h-11" />
           </div>
-          <h1 className="text-xl font-semibold text-text-primary">
+          <h1 className="text-2xl font-semibold text-text-primary">
             Enter your code
           </h1>
           <p className="mt-2 text-sm text-text-secondary">
@@ -69,7 +70,7 @@ function VerifyContent() {
           <button
             type="submit"
             disabled={loading || code.length !== 6}
-            className="w-full rounded-lg bg-brand-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-lg bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Verifying..." : "Verify & Sign In"}
           </button>

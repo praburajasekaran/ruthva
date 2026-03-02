@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_context-mode_context-mode__execute_file",
+      "Bash(git -C /Users/praburajasekaran/Documents/local-htdocs/ruthva rev-parse --is-inside-work-tree)"
+    ]
+  }
+}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { Leaf } from "lucide-react";
+import { AppLogo } from "@/components/branding/app-logo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -36,11 +36,10 @@ export default function LoginPage() {
     <div className="flex min-h-dvh flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-500">
-            <Leaf className="h-8 w-8 text-white" />
+          <div className="mx-auto mb-6 flex items-center justify-center">
+            <AppLogo priority className="h-10 sm:h-11" />
           </div>
-          <h1 className="text-2xl font-semibold text-text-primary">Ruthva</h1>
-          <p className="mt-1 text-sm text-text-secondary">
+          <p className="mt-2 text-base text-text-secondary">
             Treatment Continuity for Ayurveda
           </p>
         </div>
@@ -72,7 +71,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading || !email}
-            className="w-full rounded-lg bg-brand-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-brand-700 active:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-lg bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 active:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Sending code..." : "Send login code"}
           </button>

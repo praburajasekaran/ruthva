@@ -3,7 +3,6 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Leaf,
   ArrowRight,
   ArrowLeft,
   AlertCircle,
@@ -13,6 +12,7 @@ import {
   Clock,
   ShieldAlert,
 } from "lucide-react";
+import { AppLogo } from "@/components/branding/app-logo";
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -119,8 +119,8 @@ export default function OnboardingPage() {
         {step === 1 && (
           <>
             <div className="mb-8">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500">
-                <Leaf className="h-6 w-6 text-white" />
+              <div className="mb-6 flex items-center">
+                <AppLogo className="h-10 w-auto" priority />
               </div>
               <h1 className="text-xl font-semibold text-text-primary">
                 Set up your clinic
@@ -188,19 +188,19 @@ export default function OnboardingPage() {
                   <p className="text-2xl font-semibold tabular-nums text-risk-at-risk">
                     3
                   </p>
-                  <p className="text-[10px] text-text-secondary">At risk</p>
+                  <p className="text-xs text-text-secondary">At risk</p>
                 </div>
                 <div className="rounded-lg border border-border bg-surface p-3">
                   <p className="text-2xl font-semibold tabular-nums text-brand-600">
                     11
                   </p>
-                  <p className="text-[10px] text-text-secondary">Recovered</p>
+                  <p className="text-xs text-text-secondary">Recovered</p>
                 </div>
                 <div className="rounded-lg border border-border bg-surface p-3">
                   <p className="text-2xl font-semibold tabular-nums text-text-primary">
                     24
                   </p>
-                  <p className="text-[10px] text-text-secondary">Active</p>
+                  <p className="text-xs text-text-secondary">Active</p>
                 </div>
               </div>
 
@@ -355,7 +355,7 @@ export default function OnboardingPage() {
                     ❓ Need help
                   </div>
                 </div>
-                <p className="mt-2 text-right text-[10px] text-neutral-500">
+                <p className="mt-2 text-right text-xs text-neutral-500">
                   9:00 AM
                 </p>
               </div>
@@ -522,11 +522,10 @@ function PillButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-        selected
+      className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${selected
           ? "border-brand-500 bg-brand-50 text-brand-700"
           : "border-border bg-surface text-text-secondary hover:border-brand-300"
-      }`}
+        }`}
     >
       {label}
     </button>
@@ -585,7 +584,7 @@ function DemoPatientRow({
       </div>
       <div className="flex-1">
         <p className="text-xs font-medium text-text-primary">{name}</p>
-        <p className="text-[10px] text-text-muted">{reason}</p>
+        <p className="text-xs text-text-muted">{reason}</p>
       </div>
     </div>
   );
@@ -606,11 +605,10 @@ function SimStep({
 }) {
   return (
     <div
-      className={`flex items-start gap-3 rounded-lg border p-3 transition-all duration-500 ${
-        active
+      className={`flex items-start gap-3 rounded-lg border p-3 transition-all duration-500 ${active
           ? "border-border bg-surface-raised opacity-100 translate-y-0"
           : "border-transparent bg-transparent opacity-0 translate-y-2"
-      }`}
+        }`}
     >
       <div
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${iconBg}`}

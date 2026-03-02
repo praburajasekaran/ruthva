@@ -27,24 +27,24 @@ export default async function PatientsPage() {
   });
 
   return (
-    <div className="px-4 py-4">
-      <div className="mb-4 flex items-center gap-2 rounded-lg border border-border bg-surface-raised px-3 py-2.5">
+    <div className="app-page px-4 py-5 lg:px-8 lg:py-8">
+      <div className="mb-5 flex items-center gap-2 rounded-lg border border-border bg-surface-raised px-3 py-3 lg:px-4">
         <Search className="h-4 w-4 text-text-muted" />
-        <span className="text-sm text-text-muted">
+        <span className="text-base text-text-muted">
           Search patients... (coming soon)
         </span>
       </div>
 
-      <p className="mb-3 text-xs text-text-muted">
+      <p className="mb-3 text-sm font-medium text-text-muted">
         {patients.length} patient{patients.length !== 1 ? "s" : ""}
       </p>
 
       {patients.length === 0 ? (
-        <div className="rounded-xl border border-border bg-surface-raised p-6 text-center">
-          <p className="text-sm text-text-secondary">No patients yet.</p>
+        <div className="rounded-xl border border-border bg-surface-raised p-8 text-center">
+          <p className="text-base text-text-secondary">No patients yet.</p>
           <Link
             href="/patients/new"
-            className="mt-3 inline-block rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white"
+            className="mt-4 inline-block rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white"
           >
             Add your first patient
           </Link>
@@ -67,10 +67,10 @@ export default async function PatientsPage() {
                   className={`h-2.5 w-2.5 shrink-0 rounded-full ${riskDot}`}
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-text-primary">
+                  <p className="truncate text-base font-semibold text-text-primary">
                     {patient.name}
                   </p>
-                  <p className="text-xs text-text-muted">
+                  <p className="text-sm text-text-muted">
                     {activeJourney ? "Active treatment" : "No active treatment"}
                   </p>
                 </div>

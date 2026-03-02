@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_context-mode_context-mode__execute_file",
+      "Bash(git -C /Users/praburajasekaran/Documents/local-htdocs/ruthva rev-parse --is-inside-work-tree)",
+      "mcp__plugin_context-mode_context-mode__batch_execute",
+      "mcp__plugin_context-mode_context-mode__index",
+      "Bash(openssl s_client -connect ruthva.com:443 -servername ruthva.com)",
+      "Bash(openssl x509 -noout -subject -issuer -ext subjectAltName)"
+    ],
+    "additionalDirectories": [
+      "/Users/praburajasekaran/Documents/local-htdocs/ruthva/docs"
+    ]
+  }
+}

@@ -89,59 +89,59 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="px-4 py-4">
+    <div className="app-page px-4 py-5 lg:px-8 lg:py-8">
       {/* Primary Stat */}
-      <div className="mb-4 rounded-xl border border-border bg-surface p-4">
-        <p className="text-3xl font-semibold tabular-nums text-risk-critical">
+      <div className="app-card mb-4 rounded-xl border border-border bg-surface p-4 lg:mb-6">
+        <p className="text-4xl font-bold tabular-nums text-risk-critical lg:text-5xl">
           {atRiskCount}
         </p>
-        <p className="text-sm text-text-secondary">Patients at risk</p>
+        <p className="text-base text-text-secondary">Patients at risk</p>
         {revenueAtRisk > 0 && (
-          <p className="text-xs text-text-muted">
+          <p className="text-sm text-text-muted">
             {formatCurrency(revenueAtRisk)} revenue at risk
           </p>
         )}
       </div>
 
       {/* Secondary Stats */}
-      <div className="mb-6 grid grid-cols-3 gap-3">
-        <div className="rounded-xl border border-border bg-surface p-3">
-          <p className="text-xl font-semibold tabular-nums text-risk-critical">
+      <div className="mb-6 grid grid-cols-3 gap-3 lg:mb-8 lg:gap-4">
+        <div className="app-card rounded-xl border border-border bg-surface p-3">
+          <p className="text-2xl font-bold tabular-nums text-risk-critical lg:text-3xl">
             {criticalCount}
           </p>
-          <p className="text-xs text-text-secondary">Critical</p>
+          <p className="text-sm text-text-secondary">Critical</p>
         </div>
-        <div className="rounded-xl border border-border bg-surface p-3">
-          <p className="text-xl font-semibold tabular-nums text-brand-600">
+        <div className="app-card rounded-xl border border-border bg-surface p-3">
+          <p className="text-2xl font-bold tabular-nums text-brand-600 lg:text-3xl">
             {totalActive}
           </p>
-          <p className="text-xs text-text-secondary">Active</p>
+          <p className="text-sm text-text-secondary">Active</p>
         </div>
-        <div className="rounded-xl border border-border bg-surface p-3">
+        <div className="app-card rounded-xl border border-border bg-surface p-3">
           <div className="flex items-baseline gap-1">
-            <p className="text-xl font-semibold tabular-nums text-risk-stable">
+            <p className="text-2xl font-bold tabular-nums text-risk-stable lg:text-3xl">
               {recoveredThisMonth}
             </p>
             <Heart className="h-3 w-3 text-risk-stable" />
           </div>
-          <p className="text-xs text-text-secondary">Recovered</p>
+          <p className="text-sm text-text-secondary">Recovered</p>
         </div>
       </div>
 
       {/* At-Risk Patient List */}
       <div className="mb-2 flex items-center gap-2">
         <TrendingUp className="h-4 w-4 text-text-muted" />
-        <h2 className="text-sm font-semibold text-text-primary">
+        <h2 className="text-base font-semibold text-text-primary">
           Needs Attention
         </h2>
       </div>
 
       {atRiskPatients.length === 0 ? (
-        <div className="rounded-xl border border-border bg-surface-raised p-6 text-center">
-          <p className="text-sm text-text-secondary">
+        <div className="rounded-xl border border-border bg-surface-raised p-8 text-center">
+          <p className="text-base text-text-secondary">
             No patients at risk right now.
           </p>
-          <p className="mt-1 text-xs text-text-muted">
+          <p className="mt-1 text-sm text-text-muted">
             Add patients to start monitoring their treatment continuity.
           </p>
         </div>
@@ -163,10 +163,10 @@ export default async function DashboardPage() {
                   <AlertCircle className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-text-primary">
+                  <p className="truncate text-base font-semibold text-text-primary">
                     {journey.patient.name}
                   </p>
-                  <p className="text-xs text-text-muted">
+                  <p className="text-sm text-text-muted">
                     {journey.riskReason ||
                       `${label} — ${journey.missedVisits} missed visits`}
                   </p>

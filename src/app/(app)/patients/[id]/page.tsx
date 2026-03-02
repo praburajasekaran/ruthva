@@ -101,10 +101,10 @@ export default async function PatientDetailPage({
       activeJourney.riskLevel === "critical");
 
   return (
-    <div className="px-4 py-4">
+    <div className="app-page px-4 py-5 lg:px-8 lg:py-8">
       <Link
         href="/patients"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-text-secondary"
+        className="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-text-secondary"
       >
         <ArrowLeft className="h-4 w-4" />
         Patients
@@ -114,10 +114,10 @@ export default async function PatientDetailPage({
       <div className="mb-4 rounded-xl border border-border bg-surface p-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-semibold text-text-primary">
+            <h1 className="text-xl font-semibold text-text-primary">
               {patient.name}
             </h1>
-            <p className="text-xs text-text-muted">{patient.phone}</p>
+            <p className="text-sm text-text-muted">{patient.phone}</p>
           </div>
           {activeJourney && (
             <span
@@ -132,19 +132,19 @@ export default async function PatientDetailPage({
           <div className="mt-3 grid grid-cols-3 gap-3 border-t border-border pt-3">
             <div>
               <p className="text-xs text-text-muted">Duration</p>
-              <p className="text-sm font-medium tabular-nums">
+              <p className="text-base font-semibold tabular-nums">
                 {activeJourney.durationDays}d
               </p>
             </div>
             <div>
               <p className="text-xs text-text-muted">Follow-up</p>
-              <p className="text-sm font-medium tabular-nums">
+              <p className="text-base font-semibold tabular-nums">
                 {activeJourney.followupIntervalDays}d
               </p>
             </div>
             <div>
               <p className="text-xs text-text-muted">Missed</p>
-              <p className="text-sm font-medium tabular-nums">
+              <p className="text-base font-semibold tabular-nums">
                 {activeJourney.missedVisits}
               </p>
             </div>
@@ -152,7 +152,7 @@ export default async function PatientDetailPage({
         )}
 
         {activeJourney && activeJourney.riskReason && (
-          <p className="mt-2 text-xs text-text-secondary">
+          <p className="mt-2 text-sm text-text-secondary">
             {activeJourney.riskReason}
           </p>
         )}
@@ -169,12 +169,12 @@ export default async function PatientDetailPage({
       {/* Timeline */}
       <div className="mb-2 flex items-center gap-2">
         <Activity className="h-4 w-4 text-text-muted" />
-        <h2 className="text-sm font-semibold text-text-primary">Timeline</h2>
+        <h2 className="text-base font-semibold text-text-primary">Timeline</h2>
       </div>
 
       {events.length === 0 ? (
-        <div className="rounded-xl border border-border bg-surface-raised p-6 text-center">
-          <p className="text-sm text-text-secondary">No events yet.</p>
+        <div className="rounded-xl border border-border bg-surface-raised p-8 text-center">
+          <p className="text-base text-text-secondary">No events yet.</p>
         </div>
       ) : (
         <div className="space-y-0">
@@ -197,10 +197,10 @@ export default async function PatientDetailPage({
                   )}
                 </div>
                 <div className={`pb-4 ${isLast ? "" : ""}`}>
-                  <p className="text-sm font-medium text-text-primary">
+                  <p className="text-base font-semibold text-text-primary">
                     {label}
                   </p>
-                  <p className="text-xs text-text-muted">
+                  <p className="text-sm text-text-muted">
                     {new Date(event.eventTime).toLocaleDateString("en-IN", {
                       day: "numeric",
                       month: "short",

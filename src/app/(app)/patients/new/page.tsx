@@ -59,16 +59,16 @@ export default function NewPatientPage() {
   const isValid = name.trim() && phone.trim().length >= 10 && consent;
 
   return (
-    <div className="px-4 py-4">
+    <div className="app-page px-4 py-5 lg:max-w-3xl lg:px-8 lg:py-8">
       <Link
         href="/patients"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-text-secondary"
+        className="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-text-secondary"
       >
         <ArrowLeft className="h-4 w-4" />
         Add Patient
       </Link>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-6 rounded-2xl border border-border bg-surface p-5 lg:p-7">
         {/* Patient Name */}
         <div>
           <label
@@ -120,7 +120,7 @@ export default function NewPatientPage() {
                 key={d}
                 type="button"
                 onClick={() => setDuration(d)}
-                className={`flex-1 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
+                className={`flex-1 rounded-lg border px-3 py-3 text-sm font-semibold transition-colors ${
                   duration === d
                     ? "border-brand-600 bg-brand-50 text-brand-700"
                     : "border-border bg-surface text-text-secondary hover:bg-surface-raised"
@@ -143,7 +143,7 @@ export default function NewPatientPage() {
                 key={opt.value}
                 type="button"
                 onClick={() => setInterval(opt.value)}
-                className={`flex-1 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
+                className={`flex-1 rounded-lg border px-3 py-3 text-sm font-semibold transition-colors ${
                   interval === opt.value
                     ? "border-brand-600 bg-brand-50 text-brand-700"
                     : "border-border bg-surface text-text-secondary hover:bg-surface-raised"
@@ -163,7 +163,7 @@ export default function NewPatientPage() {
             onChange={(e) => setConsent(e.target.checked)}
             className="mt-0.5 h-5 w-5 rounded border-border text-brand-600 focus:ring-brand-500"
           />
-          <span className="text-sm text-text-secondary">
+          <span className="text-sm leading-relaxed text-text-secondary">
             Patient has given verbal consent for treatment monitoring via
             WhatsApp
           </span>
@@ -174,7 +174,7 @@ export default function NewPatientPage() {
         <button
           type="submit"
           disabled={loading || !isValid}
-          className="w-full rounded-lg bg-brand-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-brand-700 active:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full rounded-lg bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 active:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? "Adding..." : "Add Patient"}
         </button>
