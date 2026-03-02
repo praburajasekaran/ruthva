@@ -985,7 +985,7 @@ cron/
 **Goal:** Ship to first 2-3 friendly clinics.
 
 **Tasks:**
-- [ ] Build full 5-step onboarding flow (see brainstorm: docs/08-onboarding-pricing-gtm.md):
+- [x] Build full 5-step onboarding flow (see brainstorm: docs/08-onboarding-pricing-gtm.md):
   1. Identity (clinic name, doctor name, email — 30 sec)
   2. Promise preview (pre-filled demo dashboard — 30 sec)
   3. Add first patient (90 sec)
