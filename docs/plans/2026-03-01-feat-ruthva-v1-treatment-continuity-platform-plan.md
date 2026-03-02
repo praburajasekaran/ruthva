@@ -926,18 +926,18 @@ lib/
 **Tasks:**
 - [ ] Register Gupshup WhatsApp Business account
 - [ ] Submit 3 message templates for Meta approval (adherence check, pre-visit reminder, recovery) — allow 24-48hr approval time
-- [ ] Build Gupshup API client (send template message with quick-reply buttons)
-- [ ] Build webhook handler at `/api/webhooks/gupshup`:
+- [x] Build Gupshup API client (send template message with quick-reply buttons)
+- [x] Build webhook handler at `/api/webhooks/gupshup`:
   - Parse incoming quick-reply responses → create `adherence_response` event
   - Parse delivery status callbacks → update event metadata
   - Handle error codes (470 = blocked, etc.)
-- [ ] Build adherence check scheduler:
+- [x] Build adherence check scheduler:
   - Days 1-21: daily
   - Days 22+: every 2 days
   - Skip if pre-visit reminder sent same day
   - Create `adherence_check_sent` event
-- [ ] Build pre-visit reminder sender (1 day before `visit_expected`)
-- [ ] Create `reminder_sent` event
+- [x] Build pre-visit reminder sender (1 day before `visit_expected`)
+- [x] Create `reminder_sent` event
 - [ ] Implement retry logic (1 retry after 1 hour on delivery failure)
 - [ ] Configure Gupshup Subscription API for webhook delivery
 
