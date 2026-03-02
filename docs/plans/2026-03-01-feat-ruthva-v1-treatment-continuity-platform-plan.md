@@ -950,20 +950,20 @@ lib/
 **Goal:** Automated risk detection and recovery message flow.
 
 **Tasks:**
-- [ ] Build nightly cron worker (separate Railway service):
+- [x] Build nightly cron worker (separate Railway service):
   - Generate `visit_expected` events for upcoming visits
   - Detect missed visits (expected + 3 days, no confirmation) → emit `visit_missed`
   - Compute risk levels for all active journeys
   - Auto-complete journeys past duration date
   - Auto-drop journeys with 14+ days Critical + no response
-- [ ] Implement risk scoring logic (Stable → Watch → At Risk → Critical)
-- [ ] Build recovery message trigger:
+- [x] Implement risk scoring logic (Stable → Watch → At Risk → Critical)
+- [x] Build recovery message trigger:
   - At Risk → send 1st recovery message
   - Still At Risk after 3 more days → send 2nd recovery message
   - After 2nd ignored → Critical, notify doctor on dashboard only
-- [ ] Create `recovery_message_sent` events with attempt number
-- [ ] Add conflict resolution: if `visit_confirmed` exists for a date, ignore `visit_missed` for same date (latest event wins)
-- [ ] Build message fatigue limiter (no more than 1 message per day per patient)
+- [x] Create `recovery_message_sent` events with attempt number
+- [x] Add conflict resolution: if `visit_confirmed` exists for a date, ignore `visit_missed` for same date (latest event wins)
+- [x] Build message fatigue limiter (no more than 1 message per day per patient)
 
 **Key files:**
 ```
