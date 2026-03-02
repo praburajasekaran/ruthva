@@ -6,13 +6,15 @@ import Link from "next/link";
 
 export function Pricing() {
     return (
-        <section className="bg-surface py-20 px-6 sm:py-32" id="pricing">
+        <section className="bg-surface py-24 px-6 sm:py-32 relative" id="pricing">
+            <div className="absolute inset-0 bg-brand-50/50 rounded-t-[3rem] sm:rounded-t-[5rem] -z-10"></div>
+
             <div className="mx-auto max-w-5xl">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl font-bold tracking-tight text-text-primary sm:text-4xl text-balance">
+                <div className="text-center mb-16 max-w-2xl mx-auto">
+                    <h2 className="text-3xl font-bold tracking-tight text-brand-950 sm:text-4xl lg:text-5xl text-balance">
                         Simple pricing. Clear ROI.
                     </h2>
-                    <p className="mt-4 text-lg text-text-secondary">
+                    <p className="mt-6 text-lg text-text-secondary leading-relaxed">
                         Pay a flat fee, recover lost patient revenue, and protect your clinic's reputation.
                     </p>
                 </div>
@@ -22,50 +24,50 @@ export function Pricing() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="rounded-3xl shadow-xl shadow-brand-900/10 border border-border bg-white p-8 sm:p-10 relative overflow-hidden"
+                        className="rounded-[2.5rem] shadow-2xl shadow-brand-900/10 border border-brand-100 bg-white p-8 sm:p-12 relative overflow-hidden"
                     >
                         {/* The Secret Pricing Lever - Anchor Metric */}
-                        <div className="absolute top-0 inset-x-0 bg-brand-600 py-2.5 text-center text-sm font-semibold text-white">
+                        <div className="absolute top-0 inset-x-0 bg-brand-950 py-3.5 text-center text-sm font-semibold text-brand-50">
                             Revenue Protected This Month: ₹72,000*
                         </div>
 
-                        <div className="mt-6 mb-8">
-                            <h3 className="text-2xl font-semibold text-text-primary">Starter Plan</h3>
-                            <p className="text-text-secondary text-sm mt-2">Perfect for independent AYUSH practitioners looking for immediate continuity wins.</p>
+                        <div className="mt-10 mb-10">
+                            <h3 className="text-3xl font-bold text-brand-950">Starter Plan</h3>
+                            <p className="text-text-secondary text-base mt-3 leading-relaxed">Perfect for independent AYUSH practitioners looking for immediate continuity wins.</p>
 
-                            <div className="mt-6 flex items-baseline gap-x-2">
-                                <span className="text-5xl font-bold tracking-tight text-text-primary">₹1,999</span>
-                                <span className="text-sm font-semibold leading-6 text-text-secondary">/month</span>
+                            <div className="mt-8 flex items-baseline gap-x-2">
+                                <span className="text-6xl font-extrabold tracking-tight text-brand-950">₹1,999</span>
+                                <span className="text-base font-semibold leading-6 text-text-secondary">/month</span>
                             </div>
                         </div>
 
-                        <ul className="space-y-4 text-sm leading-6 text-text-secondary mb-8">
-                            <li className="flex gap-x-3 text-text-primary">
-                                <Check className="h-6 w-5 flex-none text-brand-600" aria-hidden="true" />
+                        <ul className="space-y-5 text-base leading-6 text-text-secondary mb-10">
+                            <li className="flex gap-x-4 text-brand-900 font-medium font-medium">
+                                <Check className="h-6 w-6 flex-none text-brand-500/80" aria-hidden="true" />
                                 Up to 100 active treatment journeys
                             </li>
-                            <li className="flex gap-x-3 text-text-primary">
-                                <Check className="h-6 w-5 flex-none text-brand-600" aria-hidden="true" />
+                            <li className="flex gap-x-4 text-brand-900 font-medium">
+                                <Check className="h-6 w-6 flex-none text-brand-500/80" aria-hidden="true" />
                                 Automated Adherence Checks
                             </li>
-                            <li className="flex gap-x-3 text-text-primary">
-                                <Check className="h-6 w-5 flex-none text-brand-600" aria-hidden="true" />
+                            <li className="flex gap-x-4 text-brand-900 font-medium">
+                                <Check className="h-6 w-6 flex-none text-brand-500/80" aria-hidden="true" />
                                 Recovery Automation & Alerts
                             </li>
-                            <li className="flex gap-x-3 text-text-primary">
-                                <Check className="h-6 w-5 flex-none text-brand-600" aria-hidden="true" />
+                            <li className="flex gap-x-4 text-brand-900 font-medium">
+                                <Check className="h-6 w-6 flex-none text-brand-500/80" aria-hidden="true" />
                                 WhatsApp Messaging Included
                             </li>
                         </ul>
 
                         <Link
                             href="/login"
-                            className="mt-8 block w-full rounded-md bg-brand-600 px-3.5 py-3.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 transition-colors"
+                            className="mt-8 block w-full rounded-xl bg-brand-600 px-4 py-4 text-center text-base font-semibold text-white shadow-lg shadow-brand-600/25 hover:bg-brand-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 transition-all active:scale-95"
                         >
                             Start recovering patients today
                         </Link>
 
-                        <p className="text-center text-xs text-text-muted mt-4">
+                        <p className="text-center text-xs text-text-muted mt-6">
                             *Based on 4-5 average patient recoveries / month
                         </p>
                     </motion.div>

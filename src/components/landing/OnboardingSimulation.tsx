@@ -19,9 +19,9 @@ export function OnboardingSimulation() {
                     </p>
                 </div>
 
-                <div className="grid gap-16 lg:grid-cols-12 items-center">
+                <div className="grid gap-8 lg:gap-16 lg:grid-cols-12 items-center">
                     {/* Timeline Text */}
-                    <div className="lg:col-span-5 space-y-6">
+                    <div className="lg:col-span-5 space-y-4 lg:space-y-6">
                         <FeatureStep
                             number={1}
                             title="Add a patient (takes 20s)"
@@ -29,7 +29,9 @@ export function OnboardingSimulation() {
                             Icon={UserPlus}
                             isActive={activeStep === 1}
                             onClick={() => setActiveStep(1)}
-                        />
+                        >
+                            <StepOneUI />
+                        </FeatureStep>
                         <FeatureStep
                             number={2}
                             title="Silent Monitoring"
@@ -37,7 +39,9 @@ export function OnboardingSimulation() {
                             Icon={Activity}
                             isActive={activeStep === 2}
                             onClick={() => setActiveStep(2)}
-                        />
+                        >
+                            <StepTwoUI />
+                        </FeatureStep>
                         <FeatureStep
                             number={3}
                             title="Risk Detected & Recovered"
@@ -45,11 +49,13 @@ export function OnboardingSimulation() {
                             Icon={MessageCircleHeart}
                             isActive={activeStep === 3}
                             onClick={() => setActiveStep(3)}
-                        />
+                        >
+                            <StepThreeUI />
+                        </FeatureStep>
                     </div>
 
-                    {/* Visual Simulator */}
-                    <div className="lg:col-span-7 relative h-[500px] flex items-center justify-center">
+                    {/* Visual Simulator (Desktop Only) */}
+                    <div className="hidden lg:flex lg:col-span-7 relative min-h-[400px] lg:h-[500px] w-full items-center justify-center pt-4 lg:pt-0">
                         <div className="absolute inset-0 bg-gradient-to-tr from-brand-100/40 to-transparent blur-3xl rounded-full" />
 
                         <AnimatePresence mode="wait">
@@ -79,7 +85,8 @@ function FeatureStep({
     description,
     Icon,
     isActive,
-    onClick
+    onClick,
+    children
 }: {
     number: number;
     title: string;
@@ -87,26 +94,43 @@ function FeatureStep({
     Icon: any;
     isActive: boolean;
     onClick: () => void;
+    children?: React.ReactNode;
 }) {
     return (
         <div
             onClick={onClick}
-            className={`flex gap-4 cursor-pointer transition-all duration-300 p-4 rounded-xl ${isActive ? 'bg-brand-50 shadow-sm border border-brand-100 scale-105' : 'hover:bg-gray-50 opacity-60 hover:opacity-100'
+            className={`cursor-pointer transition-all duration-300 p-4 sm:p-5 rounded-2xl ${isActive ? 'bg-brand-50 shadow-sm border border-brand-100 lg:scale-105' : 'hover:bg-gray-50 opacity-60 hover:opacity-100 border border-transparent'
                 }`}
         >
-            <div className="flex-shrink-0 mt-1">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ring-4 transition-colors ${isActive ? 'bg-brand-500 text-white ring-brand-100 border border-brand-600' : 'bg-white text-brand-700 ring-gray-50 border border-brand-200'
-                    }`}>
-                    {isActive ? <Icon className="w-5 h-5 pointer-events-none" /> : number}
+            <div className="flex gap-4">
+                <div className="flex-shrink-0 mt-1">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ring-4 transition-colors ${isActive ? 'bg-brand-500 text-white ring-brand-100 border border-brand-600' : 'bg-white text-brand-700 ring-gray-50 border border-brand-200'
+                        }`}>
+                        {isActive ? <Icon className="w-5 h-5 pointer-events-none" /> : number}
+                    </div>
+                </div>
+                <div>
+                    <h3 className={`text-lg font-bold mb-1 flex items-center gap-2 transition-colors ${isActive ? 'text-brand-900' : 'text-text-primary'
+                        }`}>
+                        {title}
+                    </h3>
+                    <p className="text-text-secondary leading-relaxed text-sm">{description}</p>
                 </div>
             </div>
-            <div>
-                <h3 className={`text-lg font-bold mb-1 flex items-center gap-2 transition-colors ${isActive ? 'text-brand-900' : 'text-text-primary'
-                    }`}>
-                    {title}
-                </h3>
-                <p className="text-text-secondary leading-relaxed text-sm">{description}</p>
-            </div>
+
+            {/* Mobile Visual Simulator (Accordion) */}
+            <AnimatePresence>
+                {isActive && children && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                        animate={{ height: "auto", opacity: 1, marginTop: 24 }}
+                        exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                        className="lg:hidden overflow-hidden"
+                    >
+                        {children}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

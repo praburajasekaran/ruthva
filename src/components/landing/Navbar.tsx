@@ -27,13 +27,13 @@ export function Navbar() {
             <div className="flex items-center gap-4">
                 <Link
                     href="/login"
-                    className="hidden text-sm font-medium text-text-secondary transition-colors hover:text-text-primary md:block"
+                    className="hidden text-sm font-semibold text-text-secondary transition-colors hover:text-brand-950 md:block"
                 >
                     Sign In
                 </Link>
                 <Link
                     href="/login"
-                    className="flex h-9 items-center justify-center gap-2 rounded-md bg-brand-600 px-4 text-sm font-medium text-white shadow-sm transition-all hover:bg-brand-700 active:scale-95"
+                    className="flex h-10 items-center justify-center gap-2 rounded-full bg-brand-950 px-5 text-sm font-bold text-white shadow-md shadow-brand-900/20 transition-all hover:bg-brand-800 active:scale-95"
                 >
                     Dashboard <ArrowRight className="h-4 w-4" />
                 </Link>
