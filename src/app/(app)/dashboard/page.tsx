@@ -1,6 +1,6 @@
 import { requireClinic } from "@/lib/session";
 import { db } from "@/lib/db";
-import { AlertCircle, TrendingUp, ChevronRight } from "lucide-react";
+import { AlertCircle, TrendingUp, ChevronRight, Heart } from "lucide-react";
 import Link from "next/link";
 
 const riskColors: Record<string, string> = {
@@ -17,62 +17,114 @@ const riskLabels: Record<string, string> = {
   critical: "Critical",
 };
 
+// Average visit value for revenue estimate (₹500 per visit)
+const AVG_VISIT_VALUE = 500;
+
 export default async function DashboardPage() {
   const { clinic } = await requireClinic();
 
-  const [atRiskCount, criticalCount, totalActive, atRiskPatients] =
-    await Promise.all([
-      db.journey.count({
-        where: {
-          clinicId: clinic.id,
-          status: "active",
-          riskLevel: { in: ["at_risk", "critical"] },
-        },
-      }),
-      db.journey.count({
-        where: {
-          clinicId: clinic.id,
-          status: "active",
-          riskLevel: "critical",
-        },
-      }),
-      db.journey.count({
-        where: { clinicId: clinic.id, status: "active" },
-      }),
-      db.journey.findMany({
-        where: {
-          clinicId: clinic.id,
-          status: "active",
-          riskLevel: { in: ["at_risk", "critical"] },
-        },
-        include: { patient: { select: { name: true } } },
-        orderBy: [{ riskLevel: "desc" }, { riskUpdatedAt: "asc" }],
-        take: 20,
-      }),
-    ]);
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const [
+    atRiskCount,
+    criticalCount,
+    totalActive,
+    recoveredThisMonth,
+    atRiskPatients,
+  ] = await Promise.all([
+    db.journey.count({
+      where: {
+        clinicId: clinic.id,
+        status: "active",
+        riskLevel: { in: ["at_risk", "critical"] },
+      },
+    }),
+    db.journey.count({
+      where: {
+        clinicId: clinic.id,
+        status: "active",
+        riskLevel: "critical",
+      },
+    }),
+    db.journey.count({
+      where: { clinicId: clinic.id, status: "active" },
+    }),
+    db.event.count({
+      where: {
+        journey: { clinicId: clinic.id },
+        eventType: "patient_returned",
+        eventTime: { gte: monthStart },
+      },
+    }),
+    db.journey.findMany({
+      where: {
+        clinicId: clinic.id,
+        status: "active",
+        riskLevel: { in: ["at_risk", "critical"] },
+      },
+      include: { patient: { select: { name: true } } },
+      orderBy: [{ riskLevel: "desc" }, { riskUpdatedAt: "asc" }],
+      take: 20,
+    }),
+  ]);
+
+  // Revenue at risk: at-risk patients × remaining visits × avg visit value
+  const revenueAtRisk = atRiskPatients.reduce((sum, j) => {
+    const remainingDays = Math.max(
+      0,
+      j.durationDays -
+        Math.floor(
+          (now.getTime() - new Date(j.startDate).getTime()) / 86400000
+        )
+    );
+    const remainingVisits = Math.ceil(remainingDays / j.followupIntervalDays);
+    return sum + remainingVisits * AVG_VISIT_VALUE;
+  }, 0);
+
+  const formatCurrency = (amount: number) => {
+    if (amount >= 100000) return `₹${(amount / 100000).toFixed(1)}L`;
+    if (amount >= 1000) return `₹${(amount / 1000).toFixed(0)}K`;
+    return `₹${amount}`;
+  };
 
   return (
     <div className="px-4 py-4">
-      {/* Stat Cards */}
+      {/* Primary Stat */}
       <div className="mb-4 rounded-xl border border-border bg-surface p-4">
         <p className="text-3xl font-semibold tabular-nums text-risk-critical">
           {atRiskCount}
         </p>
         <p className="text-sm text-text-secondary">Patients at risk</p>
+        {revenueAtRisk > 0 && (
+          <p className="text-xs text-text-muted">
+            {formatCurrency(revenueAtRisk)} revenue at risk
+          </p>
+        )}
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3">
-        <div className="rounded-xl border border-border bg-surface p-4">
-          <p className="text-2xl font-semibold tabular-nums text-risk-critical">
+      {/* Secondary Stats */}
+      <div className="mb-6 grid grid-cols-3 gap-3">
+        <div className="rounded-xl border border-border bg-surface p-3">
+          <p className="text-xl font-semibold tabular-nums text-risk-critical">
             {criticalCount}
           </p>
           <p className="text-xs text-text-secondary">Critical</p>
         </div>
-        <div className="rounded-xl border border-border bg-surface p-4">
-          <p className="text-2xl font-semibold tabular-nums text-brand-600">
+        <div className="rounded-xl border border-border bg-surface p-3">
+          <p className="text-xl font-semibold tabular-nums text-brand-600">
             {totalActive}
           </p>
-          <p className="text-xs text-text-secondary">Active journeys</p>
+          <p className="text-xs text-text-secondary">Active</p>
+        </div>
+        <div className="rounded-xl border border-border bg-surface p-3">
+          <div className="flex items-baseline gap-1">
+            <p className="text-xl font-semibold tabular-nums text-risk-stable">
+              {recoveredThisMonth}
+            </p>
+            <Heart className="h-3 w-3 text-risk-stable" />
+          </div>
+          <p className="text-xs text-text-secondary">Recovered</p>
         </div>
       </div>
 
@@ -115,7 +167,8 @@ export default async function DashboardPage() {
                     {journey.patient.name}
                   </p>
                   <p className="text-xs text-text-muted">
-                    {journey.riskReason || `${label} — ${journey.missedVisits} missed visits`}
+                    {journey.riskReason ||
+                      `${label} — ${journey.missedVisits} missed visits`}
                   </p>
                 </div>
                 <ChevronRight className="h-5 w-5 shrink-0 text-text-muted" />

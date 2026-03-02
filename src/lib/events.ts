@@ -53,7 +53,6 @@ export async function createJourneyWithEvents({
   durationDays: number;
   followupIntervalDays: number;
 }) {
-  // Calculate expected visit dates
   const visitDates: Date[] = [];
   const start = new Date(startDate);
   let currentDate = new Date(start);
@@ -67,7 +66,6 @@ export async function createJourneyWithEvents({
     currentDate.setDate(currentDate.getDate() + followupIntervalDays);
   }
 
-  // First visit date is the next expected visit
   const nextVisitDate = visitDates.length > 0 ? visitDates[0] : null;
 
   return db.$transaction(async (tx) => {
@@ -85,7 +83,6 @@ export async function createJourneyWithEvents({
       },
     });
 
-    // Create journey_started event
     await tx.event.create({
       data: {
         journeyId: journey.id,
@@ -97,7 +94,6 @@ export async function createJourneyWithEvents({
       },
     });
 
-    // Create visit_expected events for all scheduled visits
     for (let i = 0; i < visitDates.length; i++) {
       await tx.event.create({
         data: {
@@ -115,5 +111,117 @@ export async function createJourneyWithEvents({
     }
 
     return journey;
+  });
+}
+
+/**
+ * Staff confirms a patient visited. Updates journey state and creates event.
+ */
+export async function confirmVisit(journeyId: string) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const journey = await db.journey.findUniqueOrThrow({
+    where: { id: journeyId },
+  });
+
+  // Find next expected visit date after today
+  const nextExpected = await db.event.findFirst({
+    where: {
+      journeyId,
+      eventType: "visit_expected",
+      eventDate: { gte: today },
+    },
+    orderBy: { eventDate: "asc" },
+  });
+
+  const nextVisitDate = nextExpected
+    ? new Date(
+        new Date(nextExpected.eventDate).getTime() +
+          journey.followupIntervalDays * 86400000
+      )
+    : null;
+
+  await db.$transaction(async (tx) => {
+    await tx.event.upsert({
+      where: {
+        journeyId_eventType_eventDate: {
+          journeyId,
+          eventType: "visit_confirmed",
+          eventDate: today,
+        },
+      },
+      update: { metadata: { confirmed_by: "staff" } },
+      create: {
+        journeyId,
+        eventType: "visit_confirmed",
+        eventDate: today,
+        eventTime: new Date(),
+        metadata: { confirmed_by: "staff" },
+        createdBy: "staff",
+      },
+    });
+
+    await tx.journey.update({
+      where: { id: journeyId },
+      data: {
+        lastVisitDate: today,
+        nextVisitDate,
+        lastActivityAt: new Date(),
+        missedVisits: 0,
+      },
+    });
+  });
+}
+
+/**
+ * Staff marks a patient as returned after being at-risk.
+ */
+export async function markPatientReturned(journeyId: string) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const journey = await db.journey.findUniqueOrThrow({
+    where: { id: journeyId },
+  });
+
+  const daysAbsent = journey.lastVisitDate
+    ? Math.floor(
+        (today.getTime() - new Date(journey.lastVisitDate).getTime()) / 86400000
+      )
+    : 0;
+
+  await db.$transaction(async (tx) => {
+    await tx.event.upsert({
+      where: {
+        journeyId_eventType_eventDate: {
+          journeyId,
+          eventType: "patient_returned",
+          eventDate: today,
+        },
+      },
+      update: { metadata: { days_absent: daysAbsent } },
+      create: {
+        journeyId,
+        eventType: "patient_returned",
+        eventDate: today,
+        eventTime: new Date(),
+        metadata: { days_absent: daysAbsent },
+        createdBy: "staff",
+      },
+    });
+
+    await tx.journey.update({
+      where: { id: journeyId },
+      data: {
+        riskLevel: "stable",
+        riskReason: null,
+        riskUpdatedAt: new Date(),
+        lastVisitDate: today,
+        lastActivityAt: new Date(),
+        missedVisits: 0,
+        recoveryAttempts: 0,
+      },
+    });
   });
 }

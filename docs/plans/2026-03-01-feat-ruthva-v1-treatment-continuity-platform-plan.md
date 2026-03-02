@@ -891,17 +891,17 @@ lib/
 **Goal:** Core event processing and the single-screen doctor dashboard.
 
 **Tasks:**
-- [ ] Build event creation service (type-safe helpers for all 9 event types)
-- [ ] Build visit confirmation UI (staff one-tap "Visited" button on patient row)
-- [ ] Create `visit_confirmed` event on tap
-- [ ] Build doctor dashboard showing:
+- [x] Build event creation service (type-safe helpers for all 9 event types)
+- [x] Build visit confirmation UI (staff one-tap "Visited" button on patient row)
+- [x] Create `visit_confirmed` event on tap
+- [x] Build doctor dashboard showing:
   - Patients at risk count
   - Critical patients count
   - Recovered this month count
   - Revenue protected estimate (remaining_days × avg_visit_value)
-- [ ] Build at-risk patient list (name, risk level, last activity, action button)
-- [ ] Build patient timeline view (event log)
-- [ ] Implement `patient_returned` event (staff marks returned after at-risk)
+- [x] Build at-risk patient list (name, risk level, last activity, action button)
+- [x] Build patient timeline view (event log)
+- [x] Implement `patient_returned` event (staff marks returned after at-risk)
 
 **Key files:**
 ```
