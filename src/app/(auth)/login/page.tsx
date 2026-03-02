@@ -15,11 +15,17 @@ export default function LoginPage() {
     setError("");
 
     try {
-      await signIn("resend", {
+      const result = await signIn("resend", {
         email,
-        redirect: true,
-        callbackUrl: "/verify",
+        redirect: false,
       });
+
+      if (result?.error) {
+        setError("Something went wrong. Please try again.");
+        setLoading(false);
+      } else {
+        window.location.href = `/verify?email=${encodeURIComponent(email)}`;
+      }
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);

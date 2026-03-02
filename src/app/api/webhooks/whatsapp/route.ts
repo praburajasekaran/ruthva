@@ -1,0 +1,194 @@
+import { NextResponse } from "next/server";
+import { createHmac, timingSafeEqual } from "crypto";
+import { db } from "@/lib/db";
+import { createEvent } from "@/lib/events";
+import { z } from "zod";
+
+// Meta webhook payload schema
+const metaMessageSchema = z.object({
+  from: z.string(),
+  id: z.string(),
+  type: z.string(),
+  text: z.object({ body: z.string() }).optional(),
+  button: z
+    .object({
+      text: z.string().optional(),
+      payload: z.string().optional(),
+    })
+    .optional(),
+  interactive: z
+    .object({
+      type: z.string().optional(),
+      button_reply: z
+        .object({ id: z.string().optional(), title: z.string().optional() })
+        .optional(),
+    })
+    .optional(),
+  context: z
+    .object({
+      message_id: z.string().optional(),
+    })
+    .optional(),
+});
+
+function validateSignature(
+  body: string,
+  signature: string | null
+): boolean {
+  const appSecret = process.env.WHATSAPP_APP_SECRET;
+  if (!appSecret || !signature) return false;
+
+  // Meta sends "sha256=<hex>"
+  const expectedHash = createHmac("sha256", appSecret)
+    .update(body)
+    .digest("hex");
+  const expectedSignature = `sha256=${expectedHash}`;
+
+  try {
+    return timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSignature)
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * GET — Meta webhook verification handshake.
+ * Meta sends hub.mode, hub.verify_token, hub.challenge as query params.
+ */
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const mode = searchParams.get("hub.mode");
+  const token = searchParams.get("hub.verify_token");
+  const challenge = searchParams.get("hub.challenge");
+
+  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN;
+
+  if (mode === "subscribe" && token === verifyToken) {
+    return new Response(challenge || "", { status: 200 });
+  }
+
+  return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+}
+
+/**
+ * POST — Handle incoming WhatsApp messages from Meta Cloud API.
+ */
+export async function POST(request: Request) {
+  const rawBody = await request.text();
+
+  // Validate HMAC signature
+  if (process.env.WHATSAPP_APP_SECRET) {
+    const signature = request.headers.get("x-hub-signature-256");
+    if (!validateSignature(rawBody, signature)) {
+      return NextResponse.json(
+        { error: "Invalid signature" },
+        { status: 401 }
+      );
+    }
+  }
+
+  let body;
+  try {
+    body = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  // Meta sends { object: "whatsapp_business_account", entry: [...] }
+  if (body.object !== "whatsapp_business_account") {
+    return NextResponse.json({ status: "ok" });
+  }
+
+  // Process each entry/change
+  for (const entry of body.entry || []) {
+    for (const change of entry.changes || []) {
+      const value = change.value;
+      if (!value?.messages) continue;
+
+      for (const rawMessage of value.messages) {
+        const parsed = metaMessageSchema.safeParse(rawMessage);
+        if (!parsed.success) continue;
+
+        const message = parsed.data;
+        await handleIncomingMessage(message);
+      }
+    }
+  }
+
+  return NextResponse.json({ status: "ok" });
+}
+
+async function handleIncomingMessage(
+  message: z.infer<typeof metaMessageSchema>
+) {
+  const senderPhone = message.from;
+
+  // Extract message text from different message types
+  let messageText = "";
+  if (message.type === "button" && message.button) {
+    messageText = message.button.text || message.button.payload || "";
+  } else if (message.type === "interactive" && message.interactive) {
+    messageText =
+      message.interactive.button_reply?.title ||
+      message.interactive.button_reply?.id ||
+      "";
+  } else if (message.type === "text" && message.text) {
+    messageText = message.text.body;
+  }
+
+  if (!senderPhone) return;
+
+  // Find patient by phone
+  const patient = await db.patient.findFirst({
+    where: { phone: senderPhone },
+    include: {
+      journeys: {
+        where: { status: "active" },
+        take: 1,
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+
+  if (!patient || !patient.journeys[0]) return;
+
+  const journey = patient.journeys[0];
+
+  // Parse quick-reply response
+  let response: string;
+  const lower = messageText.toLowerCase();
+  if (lower.includes("yes") || lower.includes("\u2705")) {
+    response = "yes";
+  } else if (lower.includes("missed") || lower.includes("\u26a0")) {
+    response = "missed";
+  } else if (lower.includes("help") || lower.includes("\u2753")) {
+    response = "help_needed";
+  } else {
+    response = messageText.slice(0, 200);
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  await createEvent({
+    journeyId: journey.id,
+    eventType: "adherence_response",
+    eventDate: today,
+    metadata: {
+      response,
+      raw_text: messageText.slice(0, 500),
+      message_id: message.id || null,
+      source_context: message.context?.message_id || null,
+    },
+    createdBy: "patient",
+  });
+
+  // Update journey activity timestamp
+  await db.journey.update({
+    where: { id: journey.id },
+    data: { lastActivityAt: new Date() },
+  });
+}

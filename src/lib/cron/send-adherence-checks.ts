@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { sendAdherenceCheck } from "../gupshup";
+import { sendAdherenceCheck } from "../whatsapp";
 
 /**
  * Send daily adherence checks to active patients.

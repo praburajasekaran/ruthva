@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { sendRecoveryMessage } from "../gupshup";
+import { sendRecoveryMessage } from "../whatsapp";
 
 /**
  * Trigger recovery messages for at-risk patients.

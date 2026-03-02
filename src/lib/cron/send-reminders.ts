@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { sendPreVisitReminder } from "../gupshup";
+import { sendPreVisitReminder } from "../whatsapp";
 
 /**
  * Send pre-visit reminders 1 day before expected visit date.
