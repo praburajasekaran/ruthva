@@ -13,6 +13,13 @@ export default async function Home() {
   // Only redirect logged-in users straight to their dashboard.
   // Unauthenticated users stay on the landing page.
   if (session) {
+    const adminEmails = (process.env.ADMIN_EMAIL ?? "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    if (adminEmails.includes(session.user?.email?.toLowerCase() ?? "")) {
+      redirect("/admin");
+    }
     redirect("/dashboard");
   }
 

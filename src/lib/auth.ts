@@ -45,6 +45,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user }) {
+      if (!user.email) return false;
+      const dbUser = await db.user.findUnique({
+        where: { email: user.email },
+        select: { deactivatedAt: true },
+      });
+      if (dbUser?.deactivatedAt) return false;
+      return true;
+    },
     async session({ session, user }) {
       session.user.id = user.id;
       return session;

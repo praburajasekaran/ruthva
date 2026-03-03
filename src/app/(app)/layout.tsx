@@ -1,7 +1,8 @@
-import { requireClinic } from "@/lib/session";
+import { requireClinic, getSession } from "@/lib/session";
 import { BottomNav } from "./bottom-nav";
 import { SideNav } from "./side-nav";
 import { AppLogo } from "@/components/branding/app-logo";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,16 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // If an admin-only user (no clinic) lands here, send them to /admin
+  const session = await getSession();
+  const adminEmails = (process.env.ADMIN_EMAIL ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  if (adminEmails.includes(session.user.email?.toLowerCase() ?? "")) {
+    redirect("/admin");
+  }
+
   const { clinic } = await requireClinic();
 
   return (

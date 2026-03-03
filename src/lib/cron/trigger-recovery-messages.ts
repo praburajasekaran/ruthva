@@ -19,6 +19,7 @@ export async function triggerRecoveryMessages() {
       status: "active",
       riskLevel: { in: ["at_risk", "critical"] },
       recoveryAttempts: { lt: 2 },
+      clinic: { user: { deactivatedAt: null } },
     },
     include: {
       patient: {
@@ -72,7 +73,7 @@ export async function triggerRecoveryMessages() {
       if (lastRecovery) {
         const daysSinceRecovery = Math.floor(
           (today.getTime() - new Date(lastRecovery.eventTime).getTime()) /
-            86400000
+          86400000
         );
         if (daysSinceRecovery < 3) {
           skipped++;

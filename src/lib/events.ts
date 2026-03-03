@@ -137,9 +137,9 @@ export async function confirmVisit(journeyId: string) {
 
   const nextVisitDate = nextExpected
     ? new Date(
-        new Date(nextExpected.eventDate).getTime() +
-          journey.followupIntervalDays * 86400000
-      )
+      new Date(nextExpected.eventDate).getTime() +
+      journey.followupIntervalDays * 86400000
+    )
     : null;
 
   await db.$transaction(async (tx) => {
@@ -169,6 +169,9 @@ export async function confirmVisit(journeyId: string) {
         nextVisitDate,
         lastActivityAt: new Date(),
         missedVisits: 0,
+        riskLevel: "stable",
+        riskReason: null,
+        riskUpdatedAt: new Date(),
       },
     });
   });
@@ -187,8 +190,8 @@ export async function markPatientReturned(journeyId: string) {
 
   const daysAbsent = journey.lastVisitDate
     ? Math.floor(
-        (today.getTime() - new Date(journey.lastVisitDate).getTime()) / 86400000
-      )
+      (today.getTime() - new Date(journey.lastVisitDate).getTime()) / 86400000
+    )
     : 0;
 
   await db.$transaction(async (tx) => {
@@ -224,4 +227,73 @@ export async function markPatientReturned(journeyId: string) {
       },
     });
   });
+}
+
+/**
+ * Creates a journey for a patient who is already mid-treatment.
+ * Backdates the journey start and generates events accordingly.
+ */
+export async function createActivatedJourney({
+  patientId,
+  clinicId,
+  durationDays,
+  followupIntervalDays,
+  treatmentStartedAgo,
+  customStartDate,
+  lastVisitStatus,
+}: {
+  patientId: string;
+  clinicId: string;
+  durationDays: number;
+  followupIntervalDays: number;
+  treatmentStartedAgo: "today" | "7days" | "14days" | "21days" | "custom";
+  customStartDate?: string;
+  lastVisitStatus: "recent" | "unsure" | "overdue";
+}) {
+  let startDate = new Date();
+  startDate.setHours(0, 0, 0, 0);
+
+  if (treatmentStartedAgo === "7days") {
+    startDate.setDate(startDate.getDate() - 7);
+  } else if (treatmentStartedAgo === "14days") {
+    startDate.setDate(startDate.getDate() - 14);
+  } else if (treatmentStartedAgo === "21days") {
+    startDate.setDate(startDate.getDate() - 21);
+  } else if (treatmentStartedAgo === "custom" && customStartDate) {
+    startDate = new Date(customStartDate);
+    startDate.setHours(0, 0, 0, 0);
+  }
+
+  const journey = await createJourneyWithEvents({
+    patientId,
+    clinicId,
+    startDate,
+    durationDays,
+    followupIntervalDays,
+  });
+
+  // If patient is reported as overdue, boost their risk level immediately
+  if (lastVisitStatus === "overdue") {
+    await db.journey.update({
+      where: { id: journey.id },
+      data: {
+        riskLevel: "at_risk",
+        riskReason: "Patient reported as overdue during activation",
+        riskUpdatedAt: new Date(),
+        missedVisits: 1,
+        lastActivityAt: startDate, // Set to start date as a fallback
+      },
+    });
+  } else if (lastVisitStatus === "unsure") {
+    await db.journey.update({
+      where: { id: journey.id },
+      data: {
+        riskLevel: "watch",
+        riskReason: "Recent visit status unsure during activation",
+        riskUpdatedAt: new Date(),
+      },
+    });
+  }
+
+  return journey;
 }

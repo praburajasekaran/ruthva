@@ -17,6 +17,7 @@ export async function sendReminders() {
     where: {
       status: "active",
       nextVisitDate: tomorrow,
+      clinic: { user: { deactivatedAt: null } },
     },
     include: {
       patient: {

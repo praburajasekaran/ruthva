@@ -28,25 +28,31 @@ enum EventType {
   visit_confirmed
   visit_missed
   adherence_check_sent
+  adherence_check_failed
   adherence_response
   reminder_sent
+  reminder_failed
   recovery_message_sent
+  recovery_message_failed
   patient_returned
 }
 
 // ─── Auth.js Tables ──────────────────────────────────────
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  clinic        Clinic?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id             String    @id @default(cuid())
+  name           String?
+  email          String    @unique
+  emailVerified  DateTime?
+  image          String?
+  deactivatedAt  DateTime?
+  accounts       Account[]
+  sessions       Session[]
+  clinic         Clinic?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([deactivatedAt])
 }
 
 model Account {

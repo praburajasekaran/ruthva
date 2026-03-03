@@ -26,3 +26,18 @@ export async function requireClinic() {
   }
   return { session, clinic };
 }
+
+export async function requireAdmin() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
+  const adminEmails = (process.env.ADMIN_EMAIL ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  if (!adminEmails.includes(session.user.email?.toLowerCase() ?? "")) {
+    redirect("/dashboard");
+  }
+  return session as typeof session & { user: { id: string; email: string } };
+}

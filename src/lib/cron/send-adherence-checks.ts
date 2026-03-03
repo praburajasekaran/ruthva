@@ -13,7 +13,10 @@ export async function sendAdherenceChecks() {
 
   // Get all active journeys with consent
   const journeys = await db.journey.findMany({
-    where: { status: "active" },
+    where: {
+      status: "active",
+      clinic: { user: { deactivatedAt: null } },
+    },
     include: {
       patient: {
         select: { phone: true, consentGiven: true },
