@@ -1,11 +1,98 @@
 import { NextResponse } from "next/server";
-import { createHmac, timingSafeEqual } from "crypto";
+// import { createHmac, timingSafeEqual } from "crypto"; // Meta HMAC — not used with Gupshup
 import { db } from "@/lib/db";
 import { createEvent } from "@/lib/events";
 import { z } from "zod";
 
+// ──────────────────────────────────────────────────────────────────────────────
+// Meta webhook verification & signature (commented out — using Gupshup)
+// ──────────────────────────────────────────────────────────────────────────────
 // Meta webhook payload schema
-const metaMessageSchema = z.object({
+// const metaMessageSchema = z.object({
+//   from: z.string(),
+//   id: z.string(),
+//   type: z.string(),
+//   text: z.object({ body: z.string() }).optional(),
+//   button: z
+//     .object({
+//       text: z.string().optional(),
+//       payload: z.string().optional(),
+//     })
+//     .optional(),
+//   interactive: z
+//     .object({
+//       type: z.string().optional(),
+//       button_reply: z
+//         .object({ id: z.string().optional(), title: z.string().optional() })
+//         .optional(),
+//     })
+//     .optional(),
+//   context: z
+//     .object({
+//       message_id: z.string().optional(),
+//     })
+//     .optional(),
+// });
+//
+// function validateSignature(
+//   body: string,
+//   signature: string | null
+// ): boolean {
+//   const appSecret = process.env.WHATSAPP_APP_SECRET;
+//   if (!appSecret || !signature) return false;
+//
+//   // Meta sends "sha256=<hex>"
+//   const expectedHash = createHmac("sha256", appSecret)
+//     .update(body)
+//     .digest("hex");
+//   const expectedSignature = `sha256=${expectedHash}`;
+//
+//   try {
+//     return timingSafeEqual(
+//       Buffer.from(signature),
+//       Buffer.from(expectedSignature)
+//     );
+//   } catch {
+//     return false;
+//   }
+// }
+//
+// /**
+//  * GET — Meta webhook verification handshake.
+//  * Meta sends hub.mode, hub.verify_token, hub.challenge as query params.
+//  */
+// export async function GET(request: Request) {
+//   const { searchParams } = new URL(request.url);
+//   const mode = searchParams.get("hub.mode");
+//   const token = searchParams.get("hub.verify_token");
+//   const challenge = searchParams.get("hub.challenge");
+//
+//   const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN;
+//
+//   if (mode === "subscribe" && token === verifyToken) {
+//     return new Response(challenge || "", { status: 200 });
+//   }
+//
+//   return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+// }
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Gupshup WhatsApp Webhook — Meta format (v3)
+// ──────────────────────────────────────────────────────────────────────────────
+
+/**
+ * GET — Webhook URL validation.
+ * Gupshup pings this endpoint when adding the callback URL to verify it's reachable.
+ */
+export async function GET() {
+  return NextResponse.json({ status: "ok" });
+}
+
+/**
+ * Message schema — identical to Meta Cloud API format since Gupshup
+ * is configured with "Meta format (v3)" payload.
+ */
+const messageSchema = z.object({
   from: z.string(),
   id: z.string(),
   type: z.string(),
@@ -31,60 +118,24 @@ const metaMessageSchema = z.object({
     .optional(),
 });
 
-function validateSignature(
-  body: string,
-  signature: string | null
-): boolean {
-  const appSecret = process.env.WHATSAPP_APP_SECRET;
-  if (!appSecret || !signature) return false;
-
-  // Meta sends "sha256=<hex>"
-  const expectedHash = createHmac("sha256", appSecret)
-    .update(body)
-    .digest("hex");
-  const expectedSignature = `sha256=${expectedHash}`;
-
-  try {
-    return timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature)
-    );
-  } catch {
-    return false;
-  }
-}
-
 /**
- * GET — Meta webhook verification handshake.
- * Meta sends hub.mode, hub.verify_token, hub.challenge as query params.
- */
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const mode = searchParams.get("hub.mode");
-  const token = searchParams.get("hub.verify_token");
-  const challenge = searchParams.get("hub.challenge");
-
-  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN;
-
-  if (mode === "subscribe" && token === verifyToken) {
-    return new Response(challenge || "", { status: 200 });
-  }
-
-  return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-}
-
-/**
- * POST — Handle incoming WhatsApp messages from Meta Cloud API.
+ * POST — Handle incoming WhatsApp messages via Gupshup webhook.
+ *
+ * Gupshup sends Meta-format (v3) payloads when configured that way:
+ *   { object: "whatsapp_business_account", entry: [{ changes: [{ value: { messages: [...] } }] }] }
+ *
+ * Signature validation is optional — if you've added a custom header
+ * in Gupshup's webhook config, you can validate it here.
  */
 export async function POST(request: Request) {
   const rawBody = await request.text();
 
-  // Validate HMAC signature
-  if (process.env.WHATSAPP_APP_SECRET) {
-    const signature = request.headers.get("x-hub-signature-256");
-    if (!validateSignature(rawBody, signature)) {
+  // Optional: validate a shared secret header configured in Gupshup webhook settings
+  if (process.env.GUPSHUP_WEBHOOK_SECRET) {
+    const secret = request.headers.get("x-gupshup-secret");
+    if (secret !== process.env.GUPSHUP_WEBHOOK_SECRET) {
       return NextResponse.json(
-        { error: "Invalid signature" },
+        { error: "Invalid webhook secret" },
         { status: 401 }
       );
     }
@@ -97,7 +148,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  // Meta sends { object: "whatsapp_business_account", entry: [...] }
+  // Meta format (v3): { object: "whatsapp_business_account", entry: [...] }
   if (body.object !== "whatsapp_business_account") {
     return NextResponse.json({ status: "ok" });
   }
@@ -109,7 +160,7 @@ export async function POST(request: Request) {
       if (!value?.messages) continue;
 
       for (const rawMessage of value.messages) {
-        const parsed = metaMessageSchema.safeParse(rawMessage);
+        const parsed = messageSchema.safeParse(rawMessage);
         if (!parsed.success) continue;
 
         const message = parsed.data;
@@ -122,7 +173,7 @@ export async function POST(request: Request) {
 }
 
 async function handleIncomingMessage(
-  message: z.infer<typeof metaMessageSchema>
+  message: z.infer<typeof messageSchema>
 ) {
   const senderPhone = message.from;
 
