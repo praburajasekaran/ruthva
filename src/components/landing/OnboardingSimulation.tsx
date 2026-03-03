@@ -1,11 +1,56 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+    motion,
+    AnimatePresence,
+    useAnimationFrame,
+    useMotionValue,
+    useTransform,
+    MotionValue
+} from "framer-motion";
 import { Clock, AlertTriangle, MessageCircleHeart, UserPlus, Activity, PlayCircle } from "lucide-react";
 
+const STEP_DURATION = 4000; // ms per step
+const TOTAL_STEPS = 3;
+
 export function OnboardingSimulation() {
+    // 1. A single continuous timer (0 to 12000ms) drives everything
+    const elapsed = useMotionValue(0);
+
     const [activeStep, setActiveStep] = useState(1);
+    const [isPaused, setIsPaused] = useState(false);
+    const [isFinished, setIsFinished] = useState(false);
+
+    // 2. 60fps loop that only updates the framer-motion value (no React renders per frame)
+    useAnimationFrame((time, delta) => {
+        if (isPaused || isFinished) return;
+
+        const nextElapsed = elapsed.get() + delta;
+
+        // Stop at the very end
+        if (nextElapsed >= STEP_DURATION * TOTAL_STEPS) {
+            elapsed.set(STEP_DURATION * TOTAL_STEPS);
+            setIsFinished(true);
+            setActiveStep(TOTAL_STEPS);
+            return;
+        }
+
+        elapsed.set(nextElapsed);
+
+        // Only trigger a React render when we cross to a new step
+        const currentStep = Math.floor(nextElapsed / STEP_DURATION) + 1;
+        if (currentStep !== activeStep) {
+            setActiveStep(currentStep);
+        }
+    });
+
+    const handleStepClick = (step: number) => {
+        // Instantly jump time to the start of the clicked step
+        elapsed.set((step - 1) * STEP_DURATION);
+        setIsFinished(false);
+        setActiveStep(step);
+    };
 
     return (
         <section className="bg-surface py-20 px-6 sm:py-32 relative overflow-hidden" id="how-it-works">
@@ -19,8 +64,13 @@ export function OnboardingSimulation() {
                     </p>
                 </div>
 
-                <div className="grid gap-8 lg:gap-16 lg:grid-cols-12 items-center">
-                    {/* Timeline Text */}
+                {/* Pause everything on hover */}
+                <div
+                    className="grid gap-8 lg:gap-16 lg:grid-cols-12 items-center"
+                    onMouseEnter={() => setIsPaused(true)}
+                    onMouseLeave={() => setIsPaused(false)}
+                >
+                    {/* Timeline Steps */}
                     <div className="lg:col-span-5 space-y-4 lg:space-y-6">
                         <FeatureStep
                             number={1}
@@ -28,7 +78,8 @@ export function OnboardingSimulation() {
                             description="Input only their Name, Phone, and Treatment Duration. Defaults handle the rest."
                             Icon={UserPlus}
                             isActive={activeStep === 1}
-                            onClick={() => setActiveStep(1)}
+                            elapsed={elapsed}
+                            onClick={() => handleStepClick(1)}
                         >
                             <StepOneUI />
                         </FeatureStep>
@@ -38,7 +89,8 @@ export function OnboardingSimulation() {
                             description="System instantly creates events for the journey, expected visits, and adherence checks."
                             Icon={Activity}
                             isActive={activeStep === 2}
-                            onClick={() => setActiveStep(2)}
+                            elapsed={elapsed}
+                            onClick={() => handleStepClick(2)}
                         >
                             <StepTwoUI />
                         </FeatureStep>
@@ -48,16 +100,16 @@ export function OnboardingSimulation() {
                             description="When a patient misses a milestone, Ruthva triggers an automated WhatsApp intervention."
                             Icon={MessageCircleHeart}
                             isActive={activeStep === 3}
-                            onClick={() => setActiveStep(3)}
+                            elapsed={elapsed}
+                            onClick={() => handleStepClick(3)}
                         >
                             <StepThreeUI />
                         </FeatureStep>
                     </div>
 
-                    {/* Visual Simulator (Desktop Only) */}
+                    {/* Visual Simulator — desktop only */}
                     <div className="hidden lg:flex lg:col-span-7 relative min-h-[400px] lg:h-[500px] w-full items-center justify-center pt-4 lg:pt-0">
                         <div className="absolute inset-0 bg-gradient-to-tr from-brand-100/40 to-transparent blur-3xl rounded-full" />
-
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={activeStep}
@@ -80,37 +132,48 @@ export function OnboardingSimulation() {
 }
 
 function FeatureStep({
-    number,
-    title,
-    description,
-    Icon,
-    isActive,
-    onClick,
-    children
+    number, title, description, Icon,
+    isActive, elapsed, onClick, children,
 }: {
     number: number;
     title: string;
     description: string;
     Icon: any;
     isActive: boolean;
+    elapsed: MotionValue<number>;
     onClick: () => void;
     children?: React.ReactNode;
 }) {
+    // 3. Map this specific step's time window to a 0% -> 100% width
+    const startTime = (number - 1) * STEP_DURATION;
+    const endTime = number * STEP_DURATION;
+
+    const widthPercent = useTransform(
+        elapsed,
+        [startTime, endTime],
+        ["0%", "100%"],
+        { clamp: true }
+    );
+
     return (
         <div
             onClick={onClick}
-            className={`cursor-pointer transition-all duration-300 p-4 sm:p-5 rounded-2xl ${isActive ? 'bg-brand-50 shadow-sm border border-brand-100 lg:scale-105' : 'hover:bg-gray-50 opacity-60 hover:opacity-100 border border-transparent'
+            className={`cursor-pointer transition-all duration-300 p-4 sm:p-5 rounded-2xl relative overflow-hidden ${isActive
+                    ? "bg-brand-50 shadow-sm border border-brand-100 lg:scale-105"
+                    : "hover:bg-gray-50 opacity-60 hover:opacity-100 border border-transparent"
                 }`}
         >
             <div className="flex gap-4">
                 <div className="flex-shrink-0 mt-1">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ring-4 transition-colors ${isActive ? 'bg-brand-500 text-white ring-brand-100 border border-brand-600' : 'bg-white text-brand-700 ring-gray-50 border border-brand-200'
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ring-4 transition-colors ${isActive
+                            ? "bg-brand-500 text-white ring-brand-100 border border-brand-600"
+                            : "bg-white text-brand-700 ring-gray-50 border border-brand-200"
                         }`}>
                         {isActive ? <Icon className="w-5 h-5 pointer-events-none" /> : number}
                     </div>
                 </div>
                 <div>
-                    <h3 className={`text-lg font-bold mb-1 flex items-center gap-2 transition-colors ${isActive ? 'text-brand-900' : 'text-text-primary'
+                    <h3 className={`text-lg font-bold mb-1 transition-colors ${isActive ? "text-brand-900" : "text-text-primary"
                         }`}>
                         {title}
                     </h3>
@@ -118,7 +181,15 @@ function FeatureStep({
                 </div>
             </div>
 
-            {/* Mobile Visual Simulator (Accordion) */}
+            {/* Render bar only when active. Its width is GPU-bound to the global timer! */}
+            {isActive && (
+                <motion.div
+                    className="absolute bottom-0 left-0 h-[3px] bg-brand-500 rounded-full"
+                    style={{ width: widthPercent }}
+                />
+            )}
+
+            {/* Mobile accordion */}
             <AnimatePresence>
                 {isActive && children && (
                     <motion.div
@@ -159,12 +230,12 @@ function StepOneUI() {
                 </div>
                 <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Treatment Duration</label>
-                    <div className="w-full h-10 bg-gray-50 border border-gray-200 rounded-md flex items-center px-3 text-sm text-text-primary flex justify-between">
+                    <div className="w-full h-10 bg-gray-50 border border-gray-200 rounded-md flex items-center px-3 text-sm text-text-primary justify-between">
                         <span>30 Days (Panchakarma)</span>
-                        <div className="w-4 h-4 text-brand-500"><Clock className="w-4 h-4" /></div>
+                        <Clock className="w-4 h-4 text-brand-500" />
                     </div>
                 </div>
-                <button className="w-full mt-2 bg-brand-600 hover:bg-brand-700 text-white font-medium py-2.5 rounded-md transition-colors shadow-sm flex items-center justify-center gap-2">
+                <button className="w-full mt-2 bg-brand-600 text-white font-medium py-2.5 rounded-md shadow-sm flex items-center justify-center gap-2">
                     Start Monitoring <PlayCircle className="w-4 h-4" />
                 </button>
             </div>
@@ -174,20 +245,20 @@ function StepOneUI() {
 
 function StepTwoUI() {
     return (
-        <div className="bg-white rounded-2xl border border-border shadow-2xl overflow-hidden flex flex-col h-full pointer-events-none">
+        <div className="bg-white rounded-2xl border border-border shadow-2xl overflow-hidden flex flex-col pointer-events-none">
             <div className="border-b border-border bg-gray-50 px-6 py-4 flex justify-between items-center">
                 <h4 className="font-semibold flex items-center gap-2 text-text-primary">
                     <Activity className="w-5 h-5 text-brand-600" />
                     Patient Journey
                 </h4>
-                <span className="text-xs bg-brand-100 text-brand-700 px-2 py-1 rounded-full font-medium shadow-sm">Active</span>
+                <span className="text-xs bg-brand-100 text-brand-700 px-2 py-1 rounded-full font-medium">Active</span>
             </div>
-            <div className="p-6 flex-1">
+            <div className="p-6">
                 <div className="relative border-l-2 border-brand-200 ml-3 space-y-6">
                     <div className="relative pl-6">
                         <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-brand-500 ring-4 ring-white" />
                         <h5 className="text-sm font-bold text-text-primary">Day 1: Treatment Started</h5>
-                        <p className="text-xs text-text-secondary mt-1 flex items-center gap-1.5">Profile created & welcome message sent.</p>
+                        <p className="text-xs text-text-secondary mt-1">Profile created & welcome message sent.</p>
                     </div>
                     <div className="relative pl-6">
                         <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-brand-500 ring-4 ring-white" />
@@ -195,7 +266,7 @@ function StepTwoUI() {
                         <p className="text-xs text-text-secondary mt-1">Patient confirmed taking Kashayam.</p>
                     </div>
                     <div className="relative pl-6">
-                        <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-yellow-400 ring-4 ring-white shadow-sm flex items-center justify-center" />
+                        <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-yellow-400 ring-4 ring-white" />
                         <h5 className="text-sm font-bold text-text-primary">Day 7: Follow-up Visit</h5>
                         <p className="text-xs text-text-secondary mt-1 text-yellow-600 font-medium flex items-center gap-1">
                             <Clock className="w-3 h-3 animate-pulse" /> Waiting for response...
@@ -220,7 +291,6 @@ function StepThreeUI() {
                         <p className="text-[10px] text-white/80">Automated Assistant</p>
                     </div>
                 </div>
-
                 <div className="p-4 space-y-4 min-h-[250px] flex flex-col justify-end text-sm">
                     <div className="bg-white rounded-lg rounded-tl-none p-3 shadow-sm max-w-[85%] self-start">
                         <p className="text-[#111b21] mb-2 leading-relaxed text-[13px]">
@@ -235,10 +305,9 @@ function StepThreeUI() {
                     </div>
                 </div>
             </div>
-
             <div className="mt-4 flex items-start gap-3 p-3 bg-brand-50 rounded-lg border border-brand-100 text-brand-900 text-xs">
                 <AlertTriangle className="w-4 h-4 text-brand-600 flex-shrink-0 mt-0.5" />
-                <p>This triggers when adherence drops. Dashboards update if they click "Missed today".</p>
+                <p>This triggers when adherence drops. Dashboards update if they click &quot;Missed today&quot;.</p>
             </div>
         </div>
     );

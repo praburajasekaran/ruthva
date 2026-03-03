@@ -21,7 +21,7 @@ function VerifyContent() {
     setError("");
 
     // Auth.js verifies via callback URL with token + email — must be a full page navigation
-    const callbackUrl = `/api/auth/callback/resend?token=${encodeURIComponent(code)}&email=${encodeURIComponent(email)}&callbackUrl=${encodeURIComponent("/dashboard")}`;
+    const callbackUrl = `/api/auth/callback/resend?token=${encodeURIComponent(code)}&email=${encodeURIComponent(email)}&callbackUrl=${encodeURIComponent("/")}`;
     window.location.href = callbackUrl;
   }
 
