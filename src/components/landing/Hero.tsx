@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 export function Hero() {
@@ -58,73 +59,22 @@ export function Hero() {
                     </motion.div>
                 </div>
 
-                {/* The Floating UI Mockup */}
+                {/* --- System Flow Visualization --- */}
                 <motion.div
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.2 }}
-                    className="mx-auto max-w-5xl"
+                    className="mx-auto max-w-5xl mt-12 w-full px-4 sm:px-0"
                 >
-                    <div className="relative rounded-t-xl bg-brand-900/50 backdrop-blur-md border border-brand-700/50 p-2 sm:p-4 pb-0 shadow-2xl">
-                        <div className="absolute top-4 left-4 flex gap-2">
-                            <div className="w-3 h-3 rounded-full bg-red-400/80"></div>
-                            <div className="w-3 h-3 rounded-full bg-amber-400/80"></div>
-                            <div className="w-3 h-3 rounded-full bg-green-400/80"></div>
-                        </div>
-
-                        <div className="mt-6 sm:mt-8 rounded-t-xl bg-white p-6 sm:p-8 mx-auto overflow-hidden">
-                            {/* Mockup Header */}
-                            <div className="flex items-center justify-between border-b border-border pb-6 mb-6">
-                                <div>
-                                    <h3 className="text-xl font-bold text-text-primary">Patient Recoveries (This Week)</h3>
-                                    <p className="text-sm text-text-secondary">System auto-detected drops and sent re-engagement pings.</p>
-                                </div>
-                                <div className="hidden sm:flex items-center gap-2 bg-brand-50 text-brand-600 px-3 py-1.5 rounded-md font-medium text-sm">
-                                    <CheckCircle2 className="w-4 h-4" />
-                                    Autopilot Active
-                                </div>
-                            </div>
-
-                            {/* Mockup Data Rows */}
-                            <div className="space-y-4">
-                                {/* Row 1 */}
-                                <div className="flex items-center justify-between p-4 rounded-xl border border-brand-100 bg-brand-50/50">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold">AK</div>
-                                        <div>
-                                            <p className="font-semibold text-text-primary">Arjun Kumar</p>
-                                            <p className="text-xs text-text-secondary">Panchakarma • Missed Day 4</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div> Responded
-                                        </div>
-                                        <p className="text-xs text-text-secondary mt-1">Booked for tomorrow</p>
-                                    </div>
-                                </div>
-
-                                {/* Row 2 */}
-                                <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-surface-raised">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-surface-sunken text-text-secondary flex items-center justify-center font-bold">PM</div>
-                                        <div>
-                                            <p className="font-semibold text-text-primary">Priya Menon</p>
-                                            <p className="text-xs text-text-secondary">Arthritis Package • Refill delayed</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500"></div> Ping Sent
-                                        </div>
-                                        <p className="text-xs text-text-secondary mt-1">Awaiting reply</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Faded overlay at bottom to look like it continues */}
-                            <div className="h-16 bg-gradient-to-t from-white to-transparent mt-[-2rem] relative z-10"></div>
-                        </div>
+                    <div className="relative w-full rounded-[2rem] bg-[#0c2417]/80 backdrop-blur-xl border border-[#1b4332] p-2 shadow-[0_20px_60px_rgba(0,0,0,0.6)] overflow-hidden flex items-center justify-center">
+                        <Image
+                            src="/Ruthva-hero-image.png"
+                            alt="Ruthva Adherence Flow"
+                            width={1200}
+                            height={600}
+                            className="w-full h-auto rounded-[1.5rem]"
+                            priority
+                        />
                     </div>
                 </motion.div>
             </div>

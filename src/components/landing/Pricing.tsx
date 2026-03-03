@@ -35,9 +35,17 @@ export function Pricing() {
                             <h3 className="text-3xl font-bold text-brand-950">Starter Plan</h3>
                             <p className="text-text-secondary text-base mt-3 leading-relaxed">Perfect for independent AYUSH practitioners looking for immediate continuity wins.</p>
 
-                            <div className="mt-8 flex items-baseline gap-x-2">
-                                <span className="text-6xl font-extrabold tracking-tight text-brand-950">₹1,999</span>
-                                <span className="text-base font-semibold leading-6 text-text-secondary">/month</span>
+                            <div className="mt-8 flex flex-col gap-1">
+                                <div className="flex items-center gap-2 text-text-muted">
+                                    <span className="text-xl font-medium line-through decoration-brand-500/30">₹1,999</span>
+                                    <span className="inline-flex items-center rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-bold text-brand-800 tracking-wide uppercase">
+                                        Launch Offer
+                                    </span>
+                                </div>
+                                <div className="flex items-baseline gap-x-2">
+                                    <span className="text-6xl font-extrabold tracking-tight text-brand-950">₹999</span>
+                                    <span className="text-base font-semibold leading-6 text-text-secondary">/month</span>
+                                </div>
                             </div>
                         </div>
 
