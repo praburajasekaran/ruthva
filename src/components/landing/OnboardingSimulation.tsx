@@ -159,15 +159,15 @@ function FeatureStep({
         <div
             onClick={onClick}
             className={`cursor-pointer transition-all duration-300 p-4 sm:p-5 rounded-2xl relative overflow-hidden ${isActive
-                    ? "bg-brand-50 shadow-sm border border-brand-100 lg:scale-105"
-                    : "hover:bg-gray-50 opacity-60 hover:opacity-100 border border-transparent"
+                ? "bg-brand-50 shadow-sm border border-brand-100 lg:scale-105"
+                : "hover:bg-gray-50 opacity-60 hover:opacity-100 border border-transparent"
                 }`}
         >
             <div className="flex gap-4">
                 <div className="flex-shrink-0 mt-1">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ring-4 transition-colors ${isActive
-                            ? "bg-brand-500 text-white ring-brand-100 border border-brand-600"
-                            : "bg-white text-brand-700 ring-gray-50 border border-brand-200"
+                        ? "bg-brand-500 text-white ring-brand-100 border border-brand-600"
+                        : "bg-white text-brand-700 ring-gray-50 border border-brand-200"
                         }`}>
                         {isActive ? <Icon className="w-5 h-5 pointer-events-none" /> : number}
                     </div>
@@ -287,7 +287,7 @@ function StepThreeUI() {
                         <MessageCircleHeart className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h4 className="font-semibold leading-tight text-sm">Sri Lakshmi Siddha Clinic</h4>
+                        <h4 className="font-semibold leading-tight text-sm">Sri Lakshmi Ayurveda Clinic</h4>
                         <p className="text-[10px] text-white/80">Automated Assistant</p>
                     </div>
                 </div>
@@ -295,7 +295,7 @@ function StepThreeUI() {
                     <div className="bg-white rounded-lg rounded-tl-none p-3 shadow-sm max-w-[85%] self-start">
                         <p className="text-[#111b21] mb-2 leading-relaxed text-[13px]">
                             Vanakkam 🙏<br /><br />
-                            Just a quick check from Sri Lakshmi Siddha Clinic. Did you take your medicines today?
+                            Just a quick check from Sri Lakshmi Ayurveda Clinic. Did you take your medicines today?
                         </p>
                         <div className="pt-2 border-t border-gray-100 flex flex-col gap-2">
                             <div className="text-center py-2 bg-blue-50 text-blue-600 rounded font-medium text-xs">✅ Yes I did</div>

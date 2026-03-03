@@ -187,7 +187,7 @@ Display WhatsApp message preview:
 ```
 Vanakkam 🙏
 
-Just a quick check from Sri Lakshmi Siddha Clinic.
+Just a quick check from Sri Lakshmi Ayurveda Clinic.
 
 Were you able to continue treatment today?
 

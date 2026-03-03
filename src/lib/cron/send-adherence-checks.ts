@@ -41,15 +41,18 @@ export async function sendAdherenceChecks() {
       (today.getTime() - new Date(journey.startDate).getTime()) / 86400000
     );
 
-    if (dayNumber < 1) {
-      skipped++;
-      continue;
-    }
-
     // Cadence: daily for first 21 days, every 2 days after
-    if (dayNumber > 21 && dayNumber % 2 !== 0) {
-      skipped++;
-      continue;
+    // bypassed completely if trustWindowActive is true
+    if (!journey.trustWindowActive) {
+      if (dayNumber < 1) {
+        skipped++;
+        continue;
+      }
+
+      if (dayNumber > 21 && dayNumber % 2 !== 0) {
+        skipped++;
+        continue;
+      }
     }
 
     // Check if any message already sent today (adherence, reminder, recovery)

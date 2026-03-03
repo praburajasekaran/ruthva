@@ -272,11 +272,17 @@ export async function createActivatedJourney({
     followupIntervalDays,
   });
 
+  const baseUpdate: any = {
+    trustWindowActive: true,
+    trustWindowStartDate: new Date(),
+  };
+
   // If patient is reported as overdue, boost their risk level immediately
   if (lastVisitStatus === "overdue") {
     await db.journey.update({
       where: { id: journey.id },
       data: {
+        ...baseUpdate,
         riskLevel: "at_risk",
         riskReason: "Patient reported as overdue during activation",
         riskUpdatedAt: new Date(),
@@ -288,10 +294,16 @@ export async function createActivatedJourney({
     await db.journey.update({
       where: { id: journey.id },
       data: {
+        ...baseUpdate,
         riskLevel: "watch",
         riskReason: "Recent visit status unsure during activation",
         riskUpdatedAt: new Date(),
       },
+    });
+  } else {
+    await db.journey.update({
+      where: { id: journey.id },
+      data: baseUpdate,
     });
   }
 
