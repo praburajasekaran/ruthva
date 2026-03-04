@@ -177,8 +177,8 @@ export function DoctorDetailClient({ id }: { id: string }) {
                         <div className="flex items-center gap-2 mt-2">
                             <span
                                 className={`px-2 py-0.5 rounded-full text-xs font-medium ${doctor.isActive
-                                        ? "bg-green-100 text-green-700"
-                                        : "bg-red-100 text-red-700"
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-red-100 text-red-700"
                                     }`}
                             >
                                 {doctor.isActive ? "Active" : "Deactivated"}
@@ -189,6 +189,7 @@ export function DoctorDetailClient({ id }: { id: string }) {
                                     day: "numeric",
                                     month: "short",
                                     year: "numeric",
+                                    timeZone: "Asia/Kolkata",
                                 })}
                             </span>
                         </div>
@@ -205,8 +206,8 @@ export function DoctorDetailClient({ id }: { id: string }) {
                                 onClick={handleToggle}
                                 disabled={actioning}
                                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium ${doctor.isActive
-                                        ? "bg-red-600 text-white hover:bg-red-700"
-                                        : "bg-green-600 text-white hover:bg-green-700"
+                                    ? "bg-red-600 text-white hover:bg-red-700"
+                                    : "bg-green-600 text-white hover:bg-green-700"
                                     } transition-colors disabled:opacity-50`}
                             >
                                 {actioning && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
@@ -223,8 +224,8 @@ export function DoctorDetailClient({ id }: { id: string }) {
                         <button
                             onClick={() => setConfirm(true)}
                             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${doctor.isActive
-                                    ? "border-red-200 text-red-600 hover:bg-red-50"
-                                    : "border-green-200 text-green-700 hover:bg-green-50"
+                                ? "border-red-200 text-red-600 hover:bg-red-50"
+                                : "border-green-200 text-green-700 hover:bg-green-50"
                                 }`}
                         >
                             {doctor.isActive ? (
@@ -402,6 +403,7 @@ export function DoctorDetailClient({ id }: { id: string }) {
                                             month: "short",
                                             hour: "2-digit",
                                             minute: "2-digit",
+                                            timeZone: "Asia/Kolkata",
                                         })}
                                     </p>
                                 </div>

@@ -82,10 +82,10 @@ export default async function PatientDetailPage({
   // Get events for the active journey
   const events = activeJourney
     ? await db.event.findMany({
-        where: { journeyId: activeJourney.id },
-        orderBy: { eventTime: "desc" },
-        take: 50,
-      })
+      where: { journeyId: activeJourney.id },
+      orderBy: { eventTime: "desc" },
+      take: 50,
+    })
     : [];
 
   const riskColor = activeJourney
@@ -207,6 +207,7 @@ export default async function PatientDetailPage({
                       year: "numeric",
                       hour: "2-digit",
                       minute: "2-digit",
+                      timeZone: "Asia/Kolkata",
                     })}
                   </p>
                 </div>
