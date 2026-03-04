@@ -1,6 +1,7 @@
 import { requireClinic } from "@/lib/session";
 import { signOut } from "@/lib/auth";
 import { User, Building2, LogOut } from "lucide-react";
+import ClinicEditForm from "./ClinicEditForm";
 
 export default async function SettingsPage() {
   const { session, clinic } = await requireClinic();
@@ -17,9 +18,15 @@ export default async function SettingsPage() {
             <span className="text-xs font-medium uppercase text-text-muted">
               Clinic
             </span>
+            <ClinicEditForm
+              name={clinic.name}
+              doctorName={clinic.doctorName}
+              whatsappNumber={clinic.whatsappNumber}
+            />
           </div>
           <p className="text-base font-semibold text-text-primary">{clinic.name}</p>
           <p className="text-sm text-text-secondary">Dr. {clinic.doctorName}</p>
+          <p className="mt-0.5 text-sm text-text-muted">{clinic.whatsappNumber}</p>
         </div>
 
         {/* Account Info */}

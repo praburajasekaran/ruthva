@@ -6,6 +6,16 @@ export const createClinicSchema = z.object({
   whatsappNumber: z.string().min(10, "Valid WhatsApp number required").max(15),
 });
 
+export const updateClinicSchema = z.object({
+  name: z.string().min(1, "Clinic name is required").max(100).optional(),
+  doctorName: z.string().min(1, "Doctor name is required").max(100).optional(),
+  whatsappNumber: z
+    .string()
+    .min(10, "Valid WhatsApp number required")
+    .max(15)
+    .optional(),
+});
+
 export const createPatientSchema = z.object({
   name: z.string().min(1, "Patient name is required").max(100),
   phone: z.string().min(10, "Valid phone number required").max(15),

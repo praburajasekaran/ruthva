@@ -1,0 +1,12 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "npm run start"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
+
+[[cron]]
+name = "nightly-cron"
+schedule = "30 2 * * *"
+command = "curl -s -o /dev/null -w \"%{http_code}\" -X POST \"https://$RAILWAY_PUBLIC_DOMAIN/api/cron\" -H \"x-cron-secret: $CRON_SECRET\" -H \"Content-Type: application/json\""

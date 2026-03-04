@@ -1,91 +1,10 @@
 import { createEvent } from "./events";
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Meta Cloud API (commented out — replaced by Gupshup below)
-// ──────────────────────────────────────────────────────────────────────────────
-// const GRAPH_API_VERSION = "v21.0";
-//
-// interface SendTemplateParams {
-//   to: string;
-//   templateName: string;
-//   params: string[];
-// }
-//
-// interface WhatsAppResponse {
-//   status: string;
-//   messageId?: string;
-// }
-//
-// /**
-//  * Send a WhatsApp template message via Meta Cloud API.
-//  */
-// async function sendTemplate({
-//   to,
-//   templateName,
-//   params,
-// }: SendTemplateParams): Promise<WhatsAppResponse> {
-//   const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
-//   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-//
-//   if (!accessToken || !phoneNumberId) {
-//     console.error("WhatsApp Cloud API credentials not configured");
-//     return { status: "error" };
-//   }
-//
-//   // Normalize phone: remove leading +, ensure digits only
-//   const phone = to.replace(/\D/g, "");
-//
-//   const body = {
-//     messaging_product: "whatsapp",
-//     to: phone,
-//     type: "template",
-//     template: {
-//       name: templateName,
-//       language: { code: "en" },
-//       components:
-//         params.length > 0
-//           ? [
-//               {
-//                 type: "body",
-//                 parameters: params.map((p) => ({ type: "text", text: p })),
-//               },
-//             ]
-//           : [],
-//     },
-//   };
-//
-//   try {
-//     const res = await fetch(
-//       `https://graph.facebook.com/${GRAPH_API_VERSION}/${phoneNumberId}/messages`,
-//       {
-//         method: "POST",
-//         headers: {
-//           Authorization: `Bearer ${accessToken}`,
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify(body),
-//       }
-//     );
-//
-//     const data = await res.json();
-//
-//     if (data.messages?.[0]?.id) {
-//       return { status: "sent", messageId: data.messages[0].id };
-//     }
-//
-//     console.error("WhatsApp send failed:", data);
-//     return { status: "error" };
-//   } catch (err) {
-//     console.error("WhatsApp Cloud API error:", err);
-//     return { status: "error" };
-//   }
-// }
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Gupshup WhatsApp Business API
+// Meta Cloud API
 // ──────────────────────────────────────────────────────────────────────────────
 
-const GUPSHUP_API_URL = "https://api.gupshup.io/wa/api/v1/template/msg";
+const GRAPH_API_VERSION = "v21.0";
 
 interface SendTemplateParams {
   to: string;
@@ -99,61 +18,66 @@ interface WhatsAppResponse {
 }
 
 /**
- * Send a WhatsApp template message via Gupshup API.
- *
- * Gupshup expects:
- *   POST https://api.gupshup.io/wa/api/v1/template/msg
- *   Content-Type: application/x-www-form-urlencoded
- *   Header: apikey
- *   Body: source, destination, template (JSON string with id + params)
+ * Send a WhatsApp template message via Meta Cloud API.
  */
 async function sendTemplate({
   to,
   templateName,
   params,
 }: SendTemplateParams): Promise<WhatsAppResponse> {
-  const apiKey = process.env.GUPSHUP_API_KEY;
-  const sourceNumber = process.env.GUPSHUP_SOURCE_NUMBER;
+  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
-  if (!apiKey || !sourceNumber) {
-    console.error("Gupshup API credentials not configured");
+  if (!accessToken || !phoneNumberId) {
+    console.error("WhatsApp Cloud API credentials not configured");
     return { status: "error" };
   }
 
   // Normalize phone: remove leading +, ensure digits only
   const phone = to.replace(/\D/g, "");
 
-  const templatePayload = JSON.stringify({
-    id: templateName,
-    params: params,
-  });
-
-  const body = new URLSearchParams({
-    source: sourceNumber,
-    destination: phone,
-    template: templatePayload,
-  });
+  const body = {
+    messaging_product: "whatsapp",
+    to: phone,
+    type: "template",
+    template: {
+      name: templateName,
+      language: { code: "en" },
+      components:
+        params.length > 0
+          ? [
+            {
+              type: "body",
+              parameters: params.map((p) => ({ type: "text", text: p })),
+            },
+          ]
+          : [],
+    },
+  };
 
   try {
-    const res = await fetch(GUPSHUP_API_URL, {
-      method: "POST",
-      headers: {
-        apikey: apiKey,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: body.toString(),
-    });
+    const res = await fetch(
+      `https://graph.facebook.com/${GRAPH_API_VERSION}/${phoneNumberId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      }
+    );
 
     const data = await res.json();
 
-    if (data.status === "submitted" && data.messageId) {
-      return { status: "sent", messageId: data.messageId };
+    if (data.messages?.[0]?.id) {
+      return { status: "sent", messageId: data.messages[0].id };
     }
 
-    console.error("Gupshup send failed:", data);
+    console.error("WhatsApp send failed:", data);
     return { status: "error" };
   } catch (err) {
-    console.error("Gupshup API error:", err);
+    console.error("WhatsApp Cloud API error:", err);
     return { status: "error" };
   }
 }
@@ -173,7 +97,7 @@ export async function sendAdherenceCheck({
   const result = await sendTemplate({
     to: patientPhone,
     templateName:
-      process.env.GUPSHUP_TEMPLATE_ADHERENCE || "adherence_check",
+      process.env.WHATSAPP_TEMPLATE_ADHERENCE || "adherence_check",
     params: [clinicName],
   });
 
@@ -206,7 +130,7 @@ export async function sendPreVisitReminder({
   const result = await sendTemplate({
     to: patientPhone,
     templateName:
-      process.env.GUPSHUP_TEMPLATE_REMINDER || "pre_visit_reminder",
+      process.env.WHATSAPP_TEMPLATE_REMINDER || "pre_visit_reminder",
     params: [clinicName],
   });
 
@@ -240,8 +164,8 @@ export async function sendRecoveryMessage({
 }) {
   const templateName =
     attemptNumber === 1
-      ? process.env.GUPSHUP_TEMPLATE_RECOVERY_1 || "recovery_message_1"
-      : process.env.GUPSHUP_TEMPLATE_RECOVERY_2 || "recovery_message_2";
+      ? process.env.WHATSAPP_TEMPLATE_RECOVERY_1 || "recovery_message_1"
+      : process.env.WHATSAPP_TEMPLATE_RECOVERY_2 || "recovery_message_2";
 
   const result = await sendTemplate({
     to: patientPhone,
