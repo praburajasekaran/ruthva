@@ -204,7 +204,7 @@ export default function DataDeletionPage() {
                   </li>
                 </ul>
               </div>
-            </li>
+            </div>
           </div>
         </section>
 
