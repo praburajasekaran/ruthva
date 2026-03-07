@@ -106,7 +106,7 @@ export async function sendAdherenceCheck({
 
   await createEvent({
     journeyId,
-    eventType: "adherence_check_sent",
+    eventType: result.status === "sent" ? "adherence_check_sent" : "adherence_check_failed",
     eventDate: today,
     metadata: { message_id: result.messageId || null, status: result.status },
     createdBy: "system",
@@ -139,7 +139,7 @@ export async function sendPreVisitReminder({
 
   await createEvent({
     journeyId,
-    eventType: "reminder_sent",
+    eventType: result.status === "sent" ? "reminder_sent" : "reminder_failed",
     eventDate: today,
     metadata: { message_id: result.messageId || null, status: result.status },
     createdBy: "system",
@@ -178,7 +178,7 @@ export async function sendRecoveryMessage({
 
   await createEvent({
     journeyId,
-    eventType: "recovery_message_sent",
+    eventType: result.status === "sent" ? "recovery_message_sent" : "recovery_message_failed",
     eventDate: today,
     metadata: {
       attempt: attemptNumber,

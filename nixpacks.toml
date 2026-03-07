@@ -1,2 +1,2 @@
-# Node version is controlled via NIXPACKS_NODE_VERSION=24 env var in Railway
-# and engines.node in package.json
+[phases.setup]
+nixPkgs = ["nodejs_24"]
