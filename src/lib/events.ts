@@ -83,32 +83,30 @@ export async function createJourneyWithEvents({
       },
     });
 
-    await tx.event.create({
-      data: {
-        journeyId: journey.id,
-        eventType: "journey_started",
-        eventDate: startDate,
-        eventTime: new Date(),
-        metadata: { duration: durationDays, interval: followupIntervalDays },
-        createdBy: "staff",
-      },
-    });
-
-    for (let i = 0; i < visitDates.length; i++) {
-      await tx.event.create({
-        data: {
+    const now = new Date();
+    await tx.event.createMany({
+      data: [
+        {
           journeyId: journey.id,
-          eventType: "visit_expected",
-          eventDate: visitDates[i],
-          eventTime: new Date(),
+          eventType: "journey_started",
+          eventDate: startDate,
+          eventTime: now,
+          metadata: { duration: durationDays, interval: followupIntervalDays },
+          createdBy: "staff",
+        },
+        ...visitDates.map((date, i) => ({
+          journeyId: journey.id,
+          eventType: "visit_expected" as const,
+          eventDate: date,
+          eventTime: now,
           metadata: {
             visit_number: i + 1,
-            expected_date: visitDates[i].toISOString().split("T")[0],
+            expected_date: date.toISOString().split("T")[0],
           },
           createdBy: "system",
-        },
-      });
-    }
+        })),
+      ],
+    });
 
     return journey;
   });
@@ -272,7 +270,7 @@ export async function createActivatedJourney({
     followupIntervalDays,
   });
 
-  const baseUpdate: any = {
+  const baseUpdate: Prisma.JourneyUpdateInput = {
     trustWindowActive: true,
     trustWindowStartDate: new Date(),
   };

@@ -5,6 +5,7 @@ import { detectMissedVisits } from "@/lib/cron/detect-missed-visits";
 import { computeRiskLevels } from "@/lib/cron/compute-risk-levels";
 import { triggerRecoveryMessages } from "@/lib/cron/trigger-recovery-messages";
 import { completeExpiredJourneys } from "@/lib/cron/complete-expired-journeys";
+import { secretsEqual } from "@/lib/secrets";
 
 /**
  * Nightly cron entry point.
@@ -21,7 +22,7 @@ import { completeExpiredJourneys } from "@/lib/cron/complete-expired-journeys";
 export async function POST(request: NextRequest) {
   const secret = request.headers.get("x-cron-secret");
 
-  if (!secret || secret !== process.env.CRON_SECRET) {
+  if (!secretsEqual(secret, process.env.CRON_SECRET)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
