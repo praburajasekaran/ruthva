@@ -46,12 +46,16 @@ export async function createJourneyWithEvents({
   startDate,
   durationDays,
   followupIntervalDays,
+  metadata,
+  createdBy = "staff",
 }: {
   patientId: string;
   clinicId: string;
   startDate: Date;
   durationDays: number;
   followupIntervalDays: number;
+  metadata?: Record<string, unknown>;
+  createdBy?: "system" | "staff" | "patient";
 }) {
   const visitDates: Date[] = [];
   const start = new Date(startDate);
@@ -91,8 +95,8 @@ export async function createJourneyWithEvents({
           eventType: "journey_started",
           eventDate: startDate,
           eventTime: now,
-          metadata: { duration: durationDays, interval: followupIntervalDays },
-          createdBy: "staff",
+          metadata: { duration: durationDays, interval: followupIntervalDays, ...metadata },
+          createdBy,
         },
         ...visitDates.map((date, i) => ({
           journeyId: journey.id,

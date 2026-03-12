@@ -1,0 +1,68 @@
+import { NextResponse } from "next/server";
+import { validateIntegrationRequest } from "@/lib/integration-auth";
+import { confirmVisit } from "@/lib/events";
+import { db } from "@/lib/db";
+
+/**
+ * POST /api/integration/v1/journeys/[id]/confirm-visit
+ *
+ * Called by Sivanethram when a doctor confirms a patient visited.
+ * Delegates to the existing confirmVisit() function.
+ *
+ * Headers:
+ *   X-Ruthva-Secret: shared integration secret
+ *   X-Ruthva-Subdomain: clinic subdomain in Sivanethram
+ */
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const authResult = await validateIntegrationRequest(request);
+  if (!authResult.ok) return authResult.response;
+
+  const { id: journeyId } = await params;
+
+  // Verify journey exists and belongs to this clinic
+  const journey = await db.journey.findUnique({
+    where: { id: journeyId },
+    select: { id: true, clinicId: true, status: true },
+  });
+
+  if (!journey) {
+    return NextResponse.json(
+      { error: "Not Found", message: "Journey not found" },
+      { status: 404 }
+    );
+  }
+
+  if (journey.clinicId !== authResult.clinic.id) {
+    return NextResponse.json(
+      { error: "Forbidden", message: "Journey does not belong to this clinic" },
+      { status: 403 }
+    );
+  }
+
+  if (journey.status !== "active") {
+    return NextResponse.json(
+      { error: "Conflict", message: `Journey is ${journey.status}, not active` },
+      { status: 409 }
+    );
+  }
+
+  await confirmVisit(journeyId);
+
+  // Return updated journey
+  const updated = await db.journey.findUniqueOrThrow({
+    where: { id: journeyId },
+    select: {
+      id: true,
+      status: true,
+      riskLevel: true,
+      lastVisitDate: true,
+      nextVisitDate: true,
+      missedVisits: true,
+    },
+  });
+
+  return NextResponse.json(updated);
+}
