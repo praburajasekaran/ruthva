@@ -28,6 +28,7 @@ export async function computeRiskLevels() {
   });
 
   let updated = 0;
+  const changedJourneyIds: string[] = [];
 
   for (const journey of journeys) {
     let trustWindowActive = journey.trustWindowActive;
@@ -73,11 +74,12 @@ export async function computeRiskLevels() {
           riskUpdatedAt: new Date(),
         },
       });
+      changedJourneyIds.push(journey.id);
       updated++;
     }
   }
 
-  return { updated, total: journeys.length };
+  return { updated, total: journeys.length, changedJourneyIds };
 }
 
 function computeRisk(

@@ -97,7 +97,7 @@ export async function sendAdherenceCheck({
   const result = await sendTemplate({
     to: patientPhone,
     templateName:
-      process.env.WHATSAPP_TEMPLATE_ADHERENCE || "adherence_check",
+      process.env.WHATSAPP_TEMPLATE_ADHERENCE || "adherence_check_new",
     params: [clinicName],
   });
 
@@ -130,7 +130,7 @@ export async function sendPreVisitReminder({
   const result = await sendTemplate({
     to: patientPhone,
     templateName:
-      process.env.WHATSAPP_TEMPLATE_REMINDER || "pre_visit_reminder",
+      process.env.WHATSAPP_TEMPLATE_REMINDER || "pre_visit_reminder_new",
     params: [clinicName],
   });
 
@@ -164,8 +164,8 @@ export async function sendRecoveryMessage({
 }) {
   const templateName =
     attemptNumber === 1
-      ? process.env.WHATSAPP_TEMPLATE_RECOVERY_1 || "recovery_message_1"
-      : process.env.WHATSAPP_TEMPLATE_RECOVERY_2 || "recovery_message_2";
+      ? process.env.WHATSAPP_TEMPLATE_RECOVERY_1 || "recovery_message_1_new"
+      : process.env.WHATSAPP_TEMPLATE_RECOVERY_2 || "recovery_message_2_new";
 
   const result = await sendTemplate({
     to: patientPhone,

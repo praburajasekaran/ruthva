@@ -20,7 +20,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       maxAge: 600, // 10 minutes
       async sendVerificationRequest({ identifier: email, token }) {
-        console.log(`\n🔑 OTP for ${email}: ${token}\n`);
         try {
           const { Resend: ResendClient } = await import("resend");
           const resend = new ResendClient(process.env.RESEND_API_KEY);

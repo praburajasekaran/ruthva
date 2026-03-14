@@ -115,12 +115,15 @@ export async function POST(request: Request) {
       const value = change.value;
       if (!value?.messages) continue;
 
+      // Extract business phone number to scope patient lookup to correct clinic
+      const businessPhone = value.metadata?.display_phone_number || "";
+
       for (const rawMessage of value.messages) {
         const parsed = messageSchema.safeParse(rawMessage);
         if (!parsed.success) continue;
 
         const message = parsed.data;
-        await handleIncomingMessage(message);
+        await handleIncomingMessage(message, businessPhone);
       }
     }
   }
@@ -129,7 +132,8 @@ export async function POST(request: Request) {
 }
 
 async function handleIncomingMessage(
-  message: z.infer<typeof messageSchema>
+  message: z.infer<typeof messageSchema>,
+  businessPhone: string
 ) {
   const senderPhone = message.from;
 
@@ -148,9 +152,21 @@ async function handleIncomingMessage(
 
   if (!senderPhone) return;
 
-  // Find patient by phone
+  // Resolve clinic from business phone to scope patient lookup
+  const normalizedBusinessPhone = businessPhone.replace(/\D/g, "");
+  const clinic = normalizedBusinessPhone
+    ? await db.clinic.findFirst({
+        where: { whatsappNumber: normalizedBusinessPhone },
+        select: { id: true },
+      })
+    : null;
+
+  // Find patient by phone, scoped to clinic if resolved
   const patient = await db.patient.findFirst({
-    where: { phone: senderPhone },
+    where: {
+      phone: senderPhone,
+      ...(clinic ? { clinicId: clinic.id } : {}),
+    },
     include: {
       journeys: {
         where: { status: "active" },

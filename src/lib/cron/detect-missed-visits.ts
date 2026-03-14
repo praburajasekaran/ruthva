@@ -27,6 +27,7 @@ export async function detectMissedVisits() {
   });
 
   let detected = 0;
+  const missedJourneyIds: string[] = [];
 
   for (const expected of expectedVisits) {
     // Check if already confirmed for this date
@@ -71,8 +72,9 @@ export async function detectMissedVisits() {
       },
     });
 
+    missedJourneyIds.push(expected.journeyId);
     detected++;
   }
 
-  return { detected, checked: expectedVisits.length };
+  return { detected, checked: expectedVisits.length, missedJourneyIds };
 }

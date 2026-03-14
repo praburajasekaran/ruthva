@@ -1,5 +1,7 @@
-import { createHash } from "crypto";
+import { createHmac } from "crypto";
 
 export function hashPhone(phone: string): string {
-  return createHash("sha256").update(phone.trim()).digest("hex");
+  const key = process.env.PHONE_HASH_KEY;
+  if (!key) throw new Error("PHONE_HASH_KEY not configured");
+  return createHmac("sha256", key).update(phone.trim()).digest("hex");
 }

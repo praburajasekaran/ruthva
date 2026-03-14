@@ -10,6 +10,8 @@ export async function completeExpiredJourneys() {
 
   let completed = 0;
   let dropped = 0;
+  const completedJourneyIds: string[] = [];
+  const droppedJourneyIds: string[] = [];
 
   // Auto-complete: today >= startDate + durationDays
   const expiredJourneys = await db.journey.findMany({
@@ -25,6 +27,7 @@ export async function completeExpiredJourneys() {
         where: { id: journey.id },
         data: { status: "completed" },
       });
+      completedJourneyIds.push(journey.id);
       completed++;
       continue;
     }
@@ -43,10 +46,11 @@ export async function completeExpiredJourneys() {
           where: { id: journey.id },
           data: { status: "dropped" },
         });
+        droppedJourneyIds.push(journey.id);
         dropped++;
       }
     }
   }
 
-  return { completed, dropped, checked: expiredJourneys.length };
+  return { completed, dropped, checked: expiredJourneys.length, completedJourneyIds, droppedJourneyIds };
 }

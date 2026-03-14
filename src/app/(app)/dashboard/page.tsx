@@ -2,20 +2,7 @@ import { requireClinic } from "@/lib/session";
 import { db } from "@/lib/db";
 import { AlertCircle, TrendingUp, ChevronRight, Heart } from "lucide-react";
 import Link from "next/link";
-
-const riskColors: Record<string, string> = {
-  stable: "text-risk-stable bg-risk-stable/10",
-  watch: "text-risk-watch bg-risk-watch/10",
-  at_risk: "text-risk-at-risk bg-risk-at-risk/10",
-  critical: "text-risk-critical bg-risk-critical/10",
-};
-
-const riskLabels: Record<string, string> = {
-  stable: "Stable",
-  watch: "Watch",
-  at_risk: "At Risk",
-  critical: "Critical",
-};
+import { RiskBadge } from "@/components/ui/risk-badge";
 
 // Average visit value for revenue estimate (₹500 per visit)
 const AVG_VISIT_VALUE = 500;
@@ -147,34 +134,27 @@ export default async function DashboardPage() {
         </div>
       ) : (
         <div className="divide-y divide-border rounded-xl border border-border bg-surface">
-          {atRiskPatients.map((journey) => {
-            const colors = riskColors[journey.riskLevel] || riskColors.stable;
-            const label = riskLabels[journey.riskLevel] || "Unknown";
-
-            return (
+          {atRiskPatients.map((journey) => (
               <Link
                 key={journey.id}
                 href={`/patients/${journey.patientId}`}
                 className="flex items-center gap-3 px-4 py-3 min-h-[72px] active:bg-surface-sunken transition-colors"
               >
-                <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${colors}`}
-                >
-                  <AlertCircle className="h-5 w-5" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                  <RiskBadge level={journey.riskLevel as "stable" | "watch" | "at_risk" | "critical"} showLabel={false} />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-base font-semibold text-text-primary">
                     {journey.patient.name}
                   </p>
-                  <p className="text-sm text-text-muted">
-                    {journey.riskReason ||
-                      `${label} — ${journey.missedVisits} missed visits`}
+                  <p className="flex items-center gap-1.5 text-sm text-text-muted">
+                    <RiskBadge level={journey.riskLevel as "stable" | "watch" | "at_risk" | "critical"} size="sm" />
+                    <span>— {journey.missedVisits} missed visits</span>
                   </p>
                 </div>
                 <ChevronRight className="h-5 w-5 shrink-0 text-text-muted" />
               </Link>
-            );
-          })}
+            ))}
         </div>
       )}
     </div>
