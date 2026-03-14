@@ -26,6 +26,16 @@ export const createPatientSchema = z.object({
   }),
 });
 
+export const updatePatientSchema = z.object({
+  name: z.string().min(1, "Patient name is required").max(100),
+  phone: z.string().min(10, "Valid phone number required").max(15),
+  durationDays: z.number().int().min(7).max(180),
+  followupIntervalDays: z.number().int().min(1).max(30),
+  consentGiven: z.boolean().refine((v) => v === true, {
+    message: "Patient consent is required",
+  }),
+});
+
 // ─── Integration Schemas ────────────────────────────────────────────────────
 
 export const integrationStartJourneySchema = z.object({

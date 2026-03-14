@@ -1,7 +1,7 @@
 import { requireClinic } from "@/lib/session";
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CheckCircle, AlertCircle, Clock, MessageSquare, Activity } from "lucide-react";
+import { ArrowLeft, CheckCircle, AlertCircle, Clock, MessageSquare, Activity, Pencil } from "lucide-react";
 import Link from "next/link";
 import { VisitButton } from "./visit-button";
 import { ReturnedButton } from "./returned-button";
@@ -112,20 +112,29 @@ export default async function PatientDetailPage({
 
       {/* Patient Header */}
       <div className="mb-4 rounded-xl border border-border bg-surface p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-xl font-semibold text-text-primary">
               {patient.name}
             </h1>
             <p className="text-sm text-text-muted">{patient.phone}</p>
           </div>
-          {activeJourney && (
-            <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${riskColor}`}
+          <div className="flex items-center gap-2 self-start">
+            {activeJourney && (
+              <span
+                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${riskColor}`}
+              >
+                {riskLabel}
+              </span>
+            )}
+            <Link
+              href={`/patients/${patient.id}/edit`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-raised"
             >
-              {riskLabel}
-            </span>
-          )}
+              <Pencil className="h-4 w-4" />
+              Edit
+            </Link>
+          </div>
         </div>
 
         {activeJourney && (
