@@ -60,16 +60,69 @@ export const setupClinicSchema = z.object({
 
 // ─── Integration Schemas ────────────────────────────────────────────────────
 
-export const integrationStartJourneySchema = z.object({
-  patientName: z.string().min(1, "Patient name is required").max(100),
-  patientPhone: z.string().min(10, "Valid phone number required").max(15),
-  durationDays: z.number().int().min(7).max(180),
-  followupIntervalDays: z.number().int().min(1).max(30),
-  consentGiven: z.boolean().refine((v) => v === true, {
+export const CONSENT_METHODS = [
+  "checkbox_in_consultation_modal",
+  "verbal_confirmed_by_doctor",
+  "signed_paper_form",
+  "digital_signature",
+] as const;
+export type ConsentMethod = (typeof CONSENT_METHODS)[number];
+
+export const integrationStartJourneySchema = z
+  .object({
+    patientName: z.string().min(1, "Patient name is required").max(100),
+    patientPhone: z.string().min(10, "Valid phone number required").max(15),
+    durationDays: z.number().int().min(7).max(180),
+    followupIntervalDays: z.number().int().min(1).max(30),
+    consentGiven: z.boolean(),
+    consentTimestamp: z.string().datetime({ offset: true }).optional(),
+    consentMethod: z.string().min(1).max(100).optional(),
+    consentCapturedBy: z.string().min(1).max(100).optional(),
+    externalConsultationId: z.string().min(1).max(200).optional(),
+  })
+  .refine((data) => data.consentGiven === true, {
     message: "Patient consent is required",
-  }),
-  externalConsultationId: z.string().min(1).max(200).optional(),
-});
+    path: ["consentGiven"],
+  })
+  .refine(
+    (data) => {
+      if (data.consentGiven) {
+        return !!data.consentTimestamp;
+      }
+      return true;
+    },
+    {
+      message:
+        "Consent timestamp is required when consent is given (DPDP Act 2023 compliance)",
+      path: ["consentTimestamp"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.consentGiven) {
+        return !!data.consentMethod;
+      }
+      return true;
+    },
+    {
+      message:
+        "Consent method is required when consent is given (DPDP Act 2023 compliance)",
+      path: ["consentMethod"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.consentGiven) {
+        return !!data.consentCapturedBy;
+      }
+      return true;
+    },
+    {
+      message:
+        "Consent captured by is required when consent is given (DPDP Act 2023 compliance)",
+      path: ["consentCapturedBy"],
+    },
+  );
 
 // ─── Activation Schema ──────────────────────────────────────────────────────
 

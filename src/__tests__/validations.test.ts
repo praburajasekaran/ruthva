@@ -8,6 +8,9 @@ describe("integrationStartJourneySchema", () => {
     durationDays: 30,
     followupIntervalDays: 7,
     consentGiven: true,
+    consentTimestamp: "2026-03-12T10:30:00+05:30",
+    consentMethod: "checkbox_in_consultation_modal",
+    consentCapturedBy: "dr-prabu",
   };
 
   it("accepts a valid payload", () => {
@@ -73,5 +76,82 @@ describe("integrationStartJourneySchema", () => {
       followupIntervalDays: 0,
     });
     expect(result.success).toBe(false);
+  });
+
+  // ─── Consent Audit Trail Tests (DPDP Act 2023) ──────────────────────────
+
+  it("rejects missing consentTimestamp when consentGiven is true", () => {
+    const { consentTimestamp, ...rest } = validPayload;
+    const result = integrationStartJourneySchema.safeParse(rest);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const issue = result.error.issues.find(
+        (i) => i.path.includes("consentTimestamp"),
+      );
+      expect(issue).toBeDefined();
+      expect(issue?.message).toContain("DPDP Act 2023");
+    }
+  });
+
+  it("rejects missing consentMethod when consentGiven is true", () => {
+    const { consentMethod, ...rest } = validPayload;
+    const result = integrationStartJourneySchema.safeParse(rest);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const issue = result.error.issues.find(
+        (i) => i.path.includes("consentMethod"),
+      );
+      expect(issue).toBeDefined();
+      expect(issue?.message).toContain("DPDP Act 2023");
+    }
+  });
+
+  it("rejects missing consentCapturedBy when consentGiven is true", () => {
+    const { consentCapturedBy, ...rest } = validPayload;
+    const result = integrationStartJourneySchema.safeParse(rest);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const issue = result.error.issues.find(
+        (i) => i.path.includes("consentCapturedBy"),
+      );
+      expect(issue).toBeDefined();
+      expect(issue?.message).toContain("DPDP Act 2023");
+    }
+  });
+
+  it("rejects invalid consentTimestamp format", () => {
+    const result = integrationStartJourneySchema.safeParse({
+      ...validPayload,
+      consentTimestamp: "not-a-date",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts consentTimestamp with UTC offset", () => {
+    const result = integrationStartJourneySchema.safeParse({
+      ...validPayload,
+      consentTimestamp: "2026-03-12T05:00:00Z",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts consentTimestamp with IST offset", () => {
+    const result = integrationStartJourneySchema.safeParse({
+      ...validPayload,
+      consentTimestamp: "2026-03-12T10:30:00+05:30",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("preserves all consent fields in parsed output", () => {
+    const result = integrationStartJourneySchema.safeParse(validPayload);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.consentTimestamp).toBe("2026-03-12T10:30:00+05:30");
+      expect(result.data.consentMethod).toBe(
+        "checkbox_in_consultation_modal",
+      );
+      expect(result.data.consentCapturedBy).toBe("dr-prabu");
+    }
   });
 });

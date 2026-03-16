@@ -40,23 +40,28 @@ export async function createEvent({
   });
 }
 
-export async function createJourneyWithEvents({
-  patientId,
-  clinicId,
-  startDate,
-  durationDays,
-  followupIntervalDays,
-  metadata,
-  createdBy = "staff",
-}: {
-  patientId: string;
-  clinicId: string;
-  startDate: Date;
-  durationDays: number;
-  followupIntervalDays: number;
-  metadata?: Record<string, unknown>;
-  createdBy?: "system" | "staff" | "patient";
-}) {
+export async function createJourneyWithEvents(
+  {
+    patientId,
+    clinicId,
+    startDate,
+    durationDays,
+    followupIntervalDays,
+  }: {
+    patientId: string;
+    clinicId: string;
+    startDate: Date;
+    durationDays: number;
+    followupIntervalDays: number;
+  },
+  options?: {
+    metadata?: Record<string, unknown>;
+    createdBy?: "system" | "staff" | "patient";
+  },
+) {
+  const metadata = options?.metadata;
+  const createdBy = options?.createdBy ?? "staff";
+
   const visitDates: Date[] = [];
   const start = new Date(startDate);
   let currentDate = new Date(start);

@@ -116,9 +116,11 @@ model Patient {
   name           String
   phone          String
   phoneHash      String
-  consentGiven   Boolean   @default(false)
-  consentGivenAt DateTime?
-  journeys       Journey[]
+  consentGiven      Boolean   @default(false)
+  consentGivenAt    DateTime?
+  consentMethod     String?
+  consentCapturedBy String?
+  journeys          Journey[]
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
