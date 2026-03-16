@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Users, PlusCircle, Settings } from "lucide-react";
+import { Users, Activity, PlusCircle, Settings } from "lucide-react";
 
 const tabs = [
-  { href: "/dashboard", label: "Home", icon: Home, primary: false },
-  { href: "/patients", label: "Patients", icon: Users, primary: false },
+  { href: "/patients", label: "Patients", icon: Users },
   { href: "/patients/new", label: "Add", icon: PlusCircle, primary: true },
-  { href: "/settings", label: "Settings", icon: Settings, primary: false },
+  { href: "/dashboard", label: "Continuity", icon: Activity },
+  { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
 export function BottomNav() {
@@ -20,22 +20,20 @@ export function BottomNav() {
         {tabs.map((tab) => {
           const isActive =
             pathname === tab.href ||
-            (tab.href !== "/dashboard" && pathname.startsWith(tab.href));
+            (tab.href !== "/dashboard" && tab.href !== "/settings" && pathname.startsWith(tab.href));
           const Icon = tab.icon;
 
-          if (tab.primary) {
+          if ("primary" in tab && tab.primary) {
             return (
               <Link
                 key={tab.href}
                 href={tab.href}
                 className="flex flex-col items-center gap-0.5"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-600 text-white shadow-sm">
-                  <Icon className="h-5 w-5" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-white shadow-sm">
+                  <Icon className="h-4 w-4" />
                 </div>
-                <span className="text-xs font-semibold text-brand-600">
-                  {tab.label}
-                </span>
+                <span className="text-xs font-semibold text-brand-600">{tab.label}</span>
               </Link>
             );
           }
@@ -47,14 +45,10 @@ export function BottomNav() {
               className="flex flex-col items-center gap-0.5"
             >
               <Icon
-                className={`h-5 w-5 ${
-                  isActive ? "text-brand-600" : "text-text-muted"
-                }`}
+                className={`h-5 w-5 ${isActive ? "text-brand-600" : "text-text-muted"}`}
               />
               <span
-                className={`text-xs font-semibold ${
-                  isActive ? "text-brand-600" : "text-text-muted"
-                }`}
+                className={`text-xs font-semibold ${isActive ? "text-brand-600" : "text-text-muted"}`}
               >
                 {tab.label}
               </span>

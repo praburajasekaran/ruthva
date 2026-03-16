@@ -33,6 +33,14 @@
   --color-text-secondary: #4b5563;
   --color-text-muted: #6b7280;
 
+  /* Sidebar — Linear-style dark */
+  --color-sidebar-bg: #111111;
+  --color-sidebar-border: rgba(255,255,255,0.06);
+  --color-sidebar-text: #888888;
+  --color-sidebar-text-active: #f0f0f0;
+  --color-sidebar-hover: rgba(255,255,255,0.05);
+  --color-sidebar-active: rgba(255,255,255,0.09);
+
   /* Typography scale */
   --font-sans: var(--font-sans);
   /* Inter */
