@@ -5,6 +5,37 @@ import { hashPhone } from "@/lib/crypto";
 import { createJourneyWithEvents } from "@/lib/events";
 import { db } from "@/lib/db";
 
+// ──────────────────────────────────────────────────────────────────────────────
+// Sivanethram Institutional Learnings Applied to This Integration
+//
+// These patterns come from documented solutions in the Sivanethram codebase
+// (study-abroad-service/docs/solutions/). Future developers should review
+// these before modifying integration code.
+//
+// 1. URL Pattern Shadowing (docs/solutions/logic-errors/django-duplicate-url-pattern-shadowing-405.md)
+//    - All integration routes live under /api/integration/v1/ to avoid
+//      shadowing the existing /api/journeys/ routes.
+//    - Next.js App Router uses file-based routing which prevents same-path
+//      conflicts, but the distinct prefix remains important for clarity and
+//      for the Django (Sivanethram) side which IS vulnerable to shadowing.
+//
+// 2. SSRF Allowlist (docs/solutions/security-issues/weasyprint-logo-url-ssrf-allowlist-mitigation.md)
+//    - Webhook URL uses env var SIVANETHRAM_WEBHOOK_URL (not DB-stored per-clinic URL).
+//    - Fire-time SSRF validation added in src/lib/webhook.ts: blocks private IPs,
+//      requires HTTPS in production. See isAllowedWebhookUrl().
+//    - Per-clinic webhook URLs deferred to V2 with full SSRF validation.
+//
+// 3. Transaction Safety (docs/solutions/best-practices/treatment-block-workflow-best-practices.md)
+//    - All state-changing operations (journey creation, visit confirmation,
+//      patient return) use Prisma $transaction() for race-free state transitions.
+//    - See src/lib/events.ts: createJourneyWithEvents(), confirmVisit(), markPatientReturned().
+//
+// 4. WhatsApp Webhook Pattern
+//    - Inbound WhatsApp webhook (src/app/api/webhooks/whatsapp/route.ts) returns
+//      200 immediately after lightweight processing, per Meta best practices and
+//      Sivanethram institutional guidance.
+// ──────────────────────────────────────────────────────────────────────────────
+
 /**
  * POST /api/integration/v1/journeys/start
  *
@@ -15,7 +46,7 @@ import { db } from "@/lib/db";
  *   X-Ruthva-Secret: shared integration secret
  *   X-Ruthva-Subdomain: clinic subdomain in Sivanethram
  *
- * Body: { patientName, patientPhone, durationDays, followupIntervalDays, consentGiven, externalConsultationId? }
+ * Body: { patientName, patientPhone, durationDays, followupIntervalDays, consentGiven, consentTimestamp, consentMethod, consentCapturedBy, externalConsultationId? }
  *
  * Returns:
  *   201: { journeyId, patientId, status, startDate, nextVisitDate }
@@ -61,6 +92,9 @@ export async function POST(request: Request) {
     patientPhone,
     durationDays,
     followupIntervalDays,
+    consentTimestamp,
+    consentMethod,
+    consentCapturedBy,
     externalConsultationId,
   } = parsed.data;
 
@@ -110,7 +144,9 @@ export async function POST(request: Request) {
         phone: patientPhone,
         phoneHash,
         consentGiven: true,
-        consentGivenAt: new Date(),
+        consentGivenAt: consentTimestamp ? new Date(consentTimestamp) : new Date(),
+        consentMethod,
+        consentCapturedBy,
       },
       include: {
         journeys: {
@@ -126,16 +162,27 @@ export async function POST(request: Request) {
   const startDate = new Date();
   startDate.setHours(0, 0, 0, 0);
 
-  const journey = await createJourneyWithEvents({
-    patientId: patient.id,
-    clinicId: clinic.id,
-    startDate,
-    durationDays,
-    followupIntervalDays,
-    metadata: externalConsultationId
-      ? { externalConsultationId, source: "sivanethram" }
-      : { source: "sivanethram" },
-  });
+  const journey = await createJourneyWithEvents(
+    {
+      patientId: patient.id,
+      clinicId: clinic.id,
+      startDate,
+      durationDays,
+      followupIntervalDays,
+    },
+    {
+      metadata: {
+        source: "sivanethram",
+        ...(externalConsultationId && { externalConsultationId }),
+        consentAudit: {
+          consentTimestamp,
+          consentMethod,
+          consentCapturedBy,
+        },
+      },
+      createdBy: "system",
+    },
+  );
 
   return NextResponse.json(
     {

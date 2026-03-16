@@ -1,5 +1,67 @@
 import { db } from "./db";
 
+// ──────────────────────────────────────────────────────────────────────────────
+// SSRF Protection for outbound webhook URLs
+//
+// Institutional learning from Sivanethram:
+//   docs/solutions/security-issues/weasyprint-logo-url-ssrf-allowlist-mitigation.md
+//
+// Even though V1 uses an env var (not a DB-stored URL), we validate at
+// fire-time to guard against misconfigured env vars pointing to internal
+// services (cloud metadata, localhost DBs, etc.).
+// ──────────────────────────────────────────────────────────────────────────────
+
+/** Private/reserved IPv4 ranges that must never be reached by outbound webhooks. */
+const PRIVATE_IP_PATTERNS = [
+  /^127\./,                   // loopback
+  /^10\./,                    // Class A private
+  /^172\.(1[6-9]|2\d|3[01])\./, // Class B private
+  /^192\.168\./,              // Class C private
+  /^169\.254\./,              // link-local
+  /^0\./,                     // current network
+];
+
+/**
+ * Validates that a webhook URL is safe to fetch (not an SSRF vector).
+ * - Must be HTTPS
+ * - Hostname must not resolve to a private/reserved IP range
+ * - Must not use IP-literal hostnames
+ */
+function isAllowedWebhookUrl(urlString: string): { ok: true } | { ok: false; reason: string } {
+  let parsed: URL;
+  try {
+    parsed = new URL(urlString);
+  } catch {
+    return { ok: false, reason: "Malformed URL" };
+  }
+
+  // Must be HTTPS in production
+  if (parsed.protocol !== "https:" && process.env.NODE_ENV === "production") {
+    return { ok: false, reason: `Protocol must be https, got ${parsed.protocol}` };
+  }
+
+  // Block non-http(s) schemes entirely
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    return { ok: false, reason: `Disallowed protocol: ${parsed.protocol}` };
+  }
+
+  const hostname = parsed.hostname;
+
+  // Block localhost variants
+  if (hostname === "localhost" || hostname === "[::1]") {
+    return { ok: false, reason: "localhost is not allowed" };
+  }
+
+  // Block IP-literal hostnames (bypass DNS-based checks)
+  for (const pattern of PRIVATE_IP_PATTERNS) {
+    if (pattern.test(hostname)) {
+      return { ok: false, reason: `Private IP range not allowed: ${hostname}` };
+    }
+  }
+
+  return { ok: true };
+}
+
 /**
  * Webhook event types sent from Ruthva to Sivanethram.
  *
@@ -38,6 +100,16 @@ export async function sendWebhook(payload: WebhookPayload): Promise<boolean> {
 
   if (!secret) {
     console.error("[webhook] RUTHVA_INTEGRATION_SECRET not set, skipping");
+    return false;
+  }
+
+  // SSRF guard: validate URL at fire-time even though it comes from an env var.
+  // See: Sivanethram learning — validate at write-time AND at fire-time.
+  const urlCheck = isAllowedWebhookUrl(webhookUrl);
+  if (!urlCheck.ok) {
+    console.error(
+      `[webhook] SIVANETHRAM_WEBHOOK_URL blocked by SSRF check: ${urlCheck.reason}`
+    );
     return false;
   }
 

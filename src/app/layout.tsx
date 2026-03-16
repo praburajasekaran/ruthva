@@ -17,7 +17,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: {
     template: "%s | Ruthva",
-    default: "Ruthva | Treatment Continuity for Ayurveda Practices",
+    default: "Ruthva | Clinic OS for Ayurveda",
   },
   description: "Advanced continuous patient tracking and care management software designed for autonomous Ayurveda clinics.",
   keywords: ["Ayurveda software", "Patient tracking", "Clinic management", "Treatment continuity", "Ruthva"],
@@ -26,13 +26,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://ruthva.com",
-    title: "Ruthva | Treatment Continuity for Ayurveda Practices",
+    title: "Ruthva | Clinic OS for Ayurveda",
     description: "Advanced continuous patient tracking and care management software designed for autonomous Ayurveda clinics.",
     siteName: "Ruthva",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ruthva | Treatment Continuity for Ayurveda Practices",
+    title: "Ruthva | Clinic OS for Ayurveda",
     description: "Advanced continuous patient tracking and care management software designed for autonomous Ayurveda clinics.",
   },
   manifest: "/manifest.json",

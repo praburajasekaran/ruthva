@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { getClinic, isAdminEmail } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
@@ -10,19 +11,27 @@ import { Footer } from "@/components/landing/Footer";
 export default async function Home() {
   const session = await auth();
 
-  // Only redirect logged-in users straight to their dashboard.
-  // Unauthenticated users stay on the landing page.
-  if (session) {
-    const adminEmails = (process.env.ADMIN_EMAIL ?? "")
-      .split(",")
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-    if (adminEmails.includes(session.user?.email?.toLowerCase() ?? "")) {
+  if (session?.user?.id) {
+    // Admin users stay on ruthva admin panel
+    if (isAdminEmail(session.user.email)) {
       redirect("/admin");
     }
-    redirect("/dashboard");
+
+    // Check if user has a clinic
+    const { clinic } = await getClinic();
+
+    if (clinic) {
+      // Returning user: redirect via /api/sso/redirect which sets
+      // Referrer-Policy: no-referrer to prevent token leaking in the
+      // Referer header to third-party resources on clinic-os.
+      redirect("/api/sso/redirect");
+    } else {
+      // New user: send to onboarding
+      redirect("/onboarding");
+    }
   }
 
+  // Unauthenticated users see the landing page
   return (
     <main className="min-h-screen bg-surface">
       <Navbar />
