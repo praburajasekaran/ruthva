@@ -48,7 +48,7 @@ export const setupClinicSchema = z.object({
   clinicAddress: z.string().min(1, "Clinic address is required").max(500),
   whatsappNumber: z.string().min(10, "Valid WhatsApp number required").max(15),
   practiceType: z.enum(PRACTICE_TYPES, {
-    errorMap: () => ({ message: "Select a practice type" }),
+    message: "Select a practice type",
   }),
 });
 
