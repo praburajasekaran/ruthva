@@ -36,6 +36,20 @@ export const updatePatientSchema = z.object({
   }),
 });
 
+// ─── SSO / Onboarding Schemas ───────────────────────────────────────────────
+
+export const PRACTICE_TYPES = ["ayurveda", "siddha", "homeopathy"] as const;
+export type PracticeType = (typeof PRACTICE_TYPES)[number];
+
+export const setupClinicSchema = z.object({
+  doctorName: z.string().min(1, "Doctor name is required").max(100),
+  clinicName: z.string().min(1, "Clinic name is required").max(100),
+  whatsappNumber: z.string().min(10, "Valid WhatsApp number required").max(15),
+  practiceType: z.enum(PRACTICE_TYPES, {
+    errorMap: () => ({ message: "Select a practice type" }),
+  }),
+});
+
 // ─── Integration Schemas ────────────────────────────────────────────────────
 
 export const integrationStartJourneySchema = z.object({

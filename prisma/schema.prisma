@@ -40,17 +40,18 @@ enum EventType {
 // ─── Auth.js Tables ──────────────────────────────────────
 
 model User {
-  id             String    @id @default(cuid())
+  id             String     @id @default(cuid())
   name           String?
-  email          String    @unique
+  email          String     @unique
   emailVerified  DateTime?
   image          String?
   deactivatedAt  DateTime?
   accounts       Account[]
   sessions       Session[]
   clinic         Clinic?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  ssoTokens      SsoToken[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
   @@index([deactivatedAt])
 }
@@ -167,4 +168,19 @@ model Event {
   @@unique([journeyId, eventType, eventDate])
   @@index([journeyId, eventTime])
   @@index([eventType, eventTime])
+}
+
+// ─── SSO ────────────────────────────────────────────────
+
+model SsoToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([token])
+  @@index([expiresAt])
 }
