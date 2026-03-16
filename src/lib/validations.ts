@@ -43,7 +43,9 @@ export type PracticeType = (typeof PRACTICE_TYPES)[number];
 
 export const setupClinicSchema = z.object({
   doctorName: z.string().min(1, "Doctor name is required").max(100),
+  registrationNumber: z.string().min(1, "Registration number is required").max(50),
   clinicName: z.string().min(1, "Clinic name is required").max(100),
+  clinicAddress: z.string().min(1, "Clinic address is required").max(500),
   whatsappNumber: z.string().min(10, "Valid WhatsApp number required").max(15),
   practiceType: z.enum(PRACTICE_TYPES, {
     errorMap: () => ({ message: "Select a practice type" }),

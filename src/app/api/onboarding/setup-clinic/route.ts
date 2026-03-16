@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { doctorName, clinicName, whatsappNumber, practiceType } = parsed.data;
+  const { doctorName, registrationNumber, clinicName, clinicAddress, whatsappNumber, practiceType } = parsed.data;
 
   // Step 1: Provision in Django first (external dependency — more likely to fail)
   const clinicOsApiUrl = process.env.CLINIC_OS_API_URL;
@@ -73,7 +73,9 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           email: session.user.email,
           doctor_name: doctorName,
+          registration_number: registrationNumber,
           clinic_name: clinicName,
+          clinic_address: clinicAddress,
           whatsapp_number: whatsappNumber,
           discipline: toDjangoDiscipline(practiceType),
           ruthva_user_id: session.user.id,
