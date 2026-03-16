@@ -3,12 +3,7 @@
 import { useState, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { AppLogo } from "@/components/branding/app-logo";
-
-const PRACTICE_TYPES = [
-  { label: "Siddha", value: "siddha" },
-  { label: "Ayurveda", value: "ayurveda" },
-  { label: "Homeopathy", value: "homeopathy" },
-] as const;
+import { PRACTICE_TYPE_OPTIONS } from "@/lib/validations";
 
 export default function OnboardingPage() {
   const submittingRef = useRef(false);
@@ -178,7 +173,7 @@ export default function OnboardingPage() {
               Practice Type
             </label>
             <div className="flex flex-wrap gap-2">
-              {PRACTICE_TYPES.map((pt) => (
+              {PRACTICE_TYPE_OPTIONS.map((pt) => (
                 <button
                   key={pt.value}
                   type="button"

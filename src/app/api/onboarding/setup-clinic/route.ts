@@ -2,17 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { setupClinicSchema } from "@/lib/validations";
-import { createSsoToken } from "@/lib/sso";
-
-/** Maps ruthva practiceType to Django discipline field. */
-function toDjangoDiscipline(practiceType: string): string {
-  const map: Record<string, string> = {
-    ayurveda: "ayurveda",
-    siddha: "siddha",
-    homeopathy: "homeopathy",
-  };
-  return map[practiceType] ?? practiceType;
-}
 
 /**
  * New onboarding: create clinic in Django first, then Prisma, then SSO redirect.
@@ -28,9 +17,12 @@ export async function POST(request: Request) {
     where: { userId: session.user.id },
   });
   if (existingClinic) {
+    // Recovery path: clinic was created in a prior attempt but the user
+    // didn't complete the redirect. Point them to the SSO redirect route
+    // which handles token creation and sets Referrer-Policy: no-referrer.
     return NextResponse.json(
-      { error: "Clinic already exists" },
-      { status: 409 }
+      { clinic: existingClinic, redirectUrl: "/api/sso/redirect" },
+      { status: 200 }
     );
   }
 
@@ -77,7 +69,7 @@ export async function POST(request: Request) {
           clinic_name: clinicName,
           clinic_address: clinicAddress,
           whatsapp_number: whatsappNumber,
-          discipline: toDjangoDiscipline(practiceType),
+          discipline: practiceType,
           ruthva_user_id: session.user.id,
         }),
       }
@@ -135,11 +127,11 @@ export async function POST(request: Request) {
     );
   }
 
-  // Step 3: Generate SSO token inline
-  const { redirectUrl } = await createSsoToken(session.user.id);
-
+  // Step 3: Redirect via the SSO redirect route which sets
+  // Referrer-Policy: no-referrer to prevent the token leaking
+  // in the Referer header to third-party resources on clinic-os.
   return NextResponse.json(
-    { clinic, redirectUrl },
+    { clinic, redirectUrl: "/api/sso/redirect" },
     { status: 201 }
   );
 }

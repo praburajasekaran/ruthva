@@ -19,25 +19,43 @@ export async function POST() {
     return NextResponse.json({ error: "No clinic found" }, { status: 404 });
   }
 
-  // Call clinic-os Django API to trigger export
-  if (CLINIC_OS_API_URL && RUTHVA_INTEGRATION_SECRET) {
-    try {
-      const res = await fetch(`${CLINIC_OS_API_URL}/api/v1/export/all/`, {
-        method: "GET",
-        headers: {
-          "X-Ruthva-Secret": RUTHVA_INTEGRATION_SECRET,
-          "Content-Type": "application/json",
-        },
-      });
-      if (!res.ok) {
-        return NextResponse.json(
-          { error: "Export service temporarily unavailable." },
-          { status: 502 }
-        );
-      }
-    } catch {
-      // If clinic-os is not available, still acknowledge the request
+  // Call clinic-os Django API to trigger export, scoped to authenticated user
+  if (!CLINIC_OS_API_URL || !RUTHVA_INTEGRATION_SECRET) {
+    return NextResponse.json(
+      { error: "Export service is not configured." },
+      { status: 503 }
+    );
+  }
+
+  try {
+    const res = await fetch(`${CLINIC_OS_API_URL}/api/v1/export/all/`, {
+      method: "POST",
+      headers: {
+        "X-Ruthva-Secret": RUTHVA_INTEGRATION_SECRET,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ruthva_user_id: session.user.id,
+        clinic_id: clinic.id,
+      }),
+    });
+
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "Unknown error");
+      console.error(
+        `Export API failed: status=${res.status} detail=${detail}`
+      );
+      return NextResponse.json(
+        { error: "Export service temporarily unavailable." },
+        { status: 502 }
+      );
     }
+  } catch (err) {
+    console.error("Export API request failed:", err);
+    return NextResponse.json(
+      { error: "Unable to reach export service. Please try again later." },
+      { status: 502 }
+    );
   }
 
   return NextResponse.json({

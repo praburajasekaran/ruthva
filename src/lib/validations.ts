@@ -41,6 +41,12 @@ export const updatePatientSchema = z.object({
 export const PRACTICE_TYPES = ["ayurveda", "siddha", "homeopathy"] as const;
 export type PracticeType = (typeof PRACTICE_TYPES)[number];
 
+/** Label/value pairs for UI dropdowns and pill selectors. */
+export const PRACTICE_TYPE_OPTIONS = PRACTICE_TYPES.map((value) => ({
+  label: value.charAt(0).toUpperCase() + value.slice(1),
+  value,
+}));
+
 export const setupClinicSchema = z.object({
   doctorName: z.string().min(1, "Doctor name is required").max(100),
   registrationNumber: z.string().min(1, "Registration number is required").max(50),

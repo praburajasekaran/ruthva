@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation";
-import { getClinic } from "@/lib/session";
+import { requireClinic } from "@/lib/session";
 import { AppLogo } from "@/components/branding/app-logo";
 import AccountActions from "./account-actions";
 
@@ -16,7 +15,7 @@ async function fetchUsage(userId: string): Promise<{ patient_count: number; pati
           "X-Ruthva-Secret": RUTHVA_INTEGRATION_SECRET,
           "Content-Type": "application/json",
         },
-        cache: "no-store",
+        next: { revalidate: 60 },
       }
     );
     if (!res.ok) return null;
@@ -27,8 +26,7 @@ async function fetchUsage(userId: string): Promise<{ patient_count: number; pati
 }
 
 export default async function AccountPage() {
-  const { session, clinic } = await getClinic();
-  if (!clinic) redirect("/onboarding");
+  const { session, clinic } = await requireClinic();
 
   const usage = await fetchUsage(session.user.id);
   const patientCount = usage?.patient_count ?? 0;

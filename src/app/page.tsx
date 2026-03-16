@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { getClinic, isAdminEmail } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { createSsoToken } from "@/lib/sso";
 import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
 import { ProblemSolution } from "@/components/landing/ProblemSolution";
@@ -14,23 +13,18 @@ export default async function Home() {
 
   if (session?.user?.id) {
     // Admin users stay on ruthva admin panel
-    const adminEmails = (process.env.ADMIN_EMAIL ?? "")
-      .split(",")
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-    if (adminEmails.includes(session.user.email?.toLowerCase() ?? "")) {
+    if (isAdminEmail(session.user.email)) {
       redirect("/admin");
     }
 
     // Check if user has a clinic
-    const clinic = await db.clinic.findUnique({
-      where: { userId: session.user.id },
-    });
+    const { clinic } = await getClinic();
 
     if (clinic) {
-      // Returning user: generate SSO token and redirect to clinic-os
-      const { redirectUrl } = await createSsoToken(session.user.id);
-      redirect(redirectUrl);
+      // Returning user: redirect via /api/sso/redirect which sets
+      // Referrer-Policy: no-referrer to prevent token leaking in the
+      // Referer header to third-party resources on clinic-os.
+      redirect("/api/sso/redirect");
     } else {
       // New user: send to onboarding
       redirect("/onboarding");

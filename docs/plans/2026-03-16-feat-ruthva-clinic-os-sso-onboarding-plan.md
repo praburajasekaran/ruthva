@@ -466,3 +466,37 @@ From documented solutions across the codebase:
 
 - Existing integration: Ruthva ↔ Sivanethram webhook loop (PR #1)
 - Integration API: `ruthva/src/app/api/integration/v1/journeys/`
+
+## Operational Notes
+
+### Cross-Database Orphaned Records on Hard Delete
+
+Ruthva (Prisma) and Clinic-OS (Django) maintain separate database records linked by `ruthva_clinic_id`. Normal account closure uses **soft delete** (`deactivatedAt` on the User record), which keeps both sides consistent. However, **GDPR hard deletes** require coordinated cleanup across both systems to prevent orphaned records.
+
+**If a Prisma User is hard-deleted without cleaning up Django, the Django side retains orphaned Clinic and User records with no corresponding Ruthva record.**
+
+#### Procedure for GDPR Hard Deletes
+
+When hard-deleting a user from Ruthva's Prisma database (e.g., for GDPR right-to-erasure requests), you **must** also remove the corresponding records from the Clinic-OS Django database. Follow these steps in order:
+
+1. **Identify the clinic** — look up the user's `Clinic.id` and `Clinic.externalSubdomain` in Ruthva's Prisma database before deletion.
+
+2. **Delete the Django records first** — call the Django `sso_provision_rollback` endpoint to remove the Clinic and User on the Django side:
+
+   ```bash
+   curl -X DELETE \
+     "${CLINIC_OS_API_URL}/api/v1/auth/sso/provision/${RUTHVA_CLINIC_ID}/" \
+     -H "X-Ruthva-Secret: ${RUTHVA_INTEGRATION_SECRET}" \
+     -H "Content-Type: application/json"
+   ```
+
+   Replace:
+   - `${CLINIC_OS_API_URL}` — the Clinic-OS backend URL (e.g., `https://api.app.ruthva.com`)
+   - `${RUTHVA_CLINIC_ID}` — the Prisma `Clinic.id` value (this matches `ruthva_clinic_id` in Django)
+   - `${RUTHVA_INTEGRATION_SECRET}` — the shared integration secret from environment variables
+
+3. **Verify Django returned 204 No Content** — confirming the Django-side records were deleted.
+
+4. **Hard-delete the Prisma records** — delete the User (cascading to SsoToken and Clinic) from Ruthva's database.
+
+**Important:** Always delete Django-side first. If the Prisma record is deleted first and the Django call fails, you will have orphaned Django records with no easy way to locate them (the `ruthva_clinic_id` foreign key would be gone).

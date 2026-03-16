@@ -1,4 +1,4 @@
-import { getSession, getClinic } from "@/lib/session";
+import { getSession, getClinic, isAdminEmail } from "@/lib/session";
 import { createSsoToken } from "@/lib/sso";
 import { redirect } from "next/navigation";
 
@@ -18,16 +18,11 @@ export default async function AppLayout({
   const session = await getSession();
 
   // Admin users stay on ruthva
-  const adminEmails = (process.env.ADMIN_EMAIL ?? "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-  if (adminEmails.includes(session.user.email?.toLowerCase() ?? "")) {
-    // Let admin pages render normally
+  if (isAdminEmail(session.user.email)) {
     return <>{children}</>;
   }
 
-  // Non-admin users: redirect to clinic-os
+  // Non-admin users: redirect to clinic-os or onboarding
   const { clinic } = await getClinic();
   if (clinic) {
     const { redirectUrl } = await createSsoToken(session.user.id);
