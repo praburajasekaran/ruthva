@@ -1,13 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { signIn, signOut } from "next-auth/react";
 import { AppLogo } from "@/components/branding/app-logo";
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // When clinic-os logs out, it redirects here with ?logout=true
+  // to destroy the ruthva session and prevent auto-redirect back
+  useEffect(() => {
+    if (searchParams.get("logout") === "true") {
+      signOut({ redirect: false });
+    }
+  }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,7 +50,7 @@ export default function LoginPage() {
             <AppLogo priority className="h-10 sm:h-11" />
           </div>
           <p className="mt-2 text-base text-text-secondary">
-            Treatment Continuity for Ayurveda
+            Clinic OS for Ayurveda
           </p>
         </div>
 
