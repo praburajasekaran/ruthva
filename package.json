@@ -21,7 +21,7 @@
     "@upstash/redis": "^1.36.3",
     "clsx": "^2.1.1",
     "framer-motion": "^12.34.3",
-    "lightningcss-darwin-x64": "^1.32.0",
+    "lightningcss": "^1.32.0",
     "lucide-react": "^0.575.0",
     "next": "16.1.6",
     "next-auth": "^5.0.0-beta.30",
@@ -51,6 +51,6 @@
   },
   "optionalDependencies": {
     "@tailwindcss/oxide-darwin-arm64": "^4.2.1",
-    "lightningcss-darwin-arm64": "^1.31.1"
+    "lightningcss-darwin-arm64": "^1.32.0"
   }
 }
