@@ -3,6 +3,9 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import Resend from "next-auth/providers/resend";
 import { db } from "./db";
 
+const DEMO_EMAIL = "demo@ruthva.com";
+const DEMO_CODE = "123456";
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
   session: { strategy: "database" },
@@ -20,6 +23,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       maxAge: 600, // 10 minutes
       async sendVerificationRequest({ identifier: email, token }) {
+        // Demo account: overwrite token in DB to a fixed code, skip email
+        if (email.toLowerCase() === DEMO_EMAIL) {
+          await db.verificationToken.updateMany({
+            where: { identifier: email },
+            data: { token: DEMO_CODE },
+          });
+          return;
+        }
+
         const { SESClient, SendEmailCommand } = await import("@aws-sdk/client-ses");
         const ses = new SESClient({
           region: process.env.AWS_REGION,

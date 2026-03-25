@@ -90,6 +90,14 @@ function LoginContent() {
         <p className="mt-6 text-center text-xs text-text-muted">
           We&apos;ll send a 6-digit code to your email
         </p>
+
+        {email.toLowerCase() === "demo@ruthva.com" && (
+          <div className="mt-4 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-center">
+            <p className="text-sm font-medium text-brand-700">
+              Demo account — use code <span className="font-bold tracking-wider">123456</span> on the next screen
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

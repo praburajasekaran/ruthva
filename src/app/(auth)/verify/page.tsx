@@ -9,7 +9,8 @@ import { AppLogo } from "@/components/branding/app-logo";
 function VerifyContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
-  const [code, setCode] = useState("");
+  const isDemo = email.toLowerCase() === "demo@ruthva.com";
+  const [code, setCode] = useState(isDemo ? "123456" : "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -76,12 +77,20 @@ function VerifyContent() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-xs text-text-muted">
-          Didn&apos;t receive the code? Check your spam folder or{" "}
-          <Link href="/login" className="text-brand-600 underline">
-            try again
-          </Link>
-        </p>
+        {isDemo ? (
+          <div className="mt-4 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-center">
+            <p className="text-sm font-medium text-brand-700">
+              Demo account — code is pre-filled. Just click verify!
+            </p>
+          </div>
+        ) : (
+          <p className="mt-6 text-center text-xs text-text-muted">
+            Didn&apos;t receive the code? Check your spam folder or{" "}
+            <Link href="/login" className="text-brand-600 underline">
+              try again
+            </Link>
+          </p>
+        )}
       </div>
     </div>
   );
