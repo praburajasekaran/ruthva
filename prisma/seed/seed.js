@@ -1,6 +1,10 @@
-const { PrismaClient, JourneyStatus, RiskLevel, EventType } = require('@prisma/client')
+const { PrismaClient, JourneyStatus, RiskLevel, EventType } = require('../../src/generated/prisma/client')
+const { PrismaPg } = require('@prisma/adapter-pg')
 
-const prisma = new PrismaClient()
+const connectionString = process.env.DATABASE_URL
+if (!connectionString) throw new Error('DATABASE_URL is not set')
+const adapter = new PrismaPg({ connectionString })
+const prisma = new PrismaClient({ adapter })
 
 // ── Helpers ─────────────────────────────────────────────
 const addDays = (date, days) => {
